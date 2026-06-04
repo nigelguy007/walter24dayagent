@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kirkland Campaign HQ — MD-5</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+:root{--navy:#0a1628;--navy2:#0f1e38;--navy3:#162444;--navy4:#1d2f55;--navy5:#243660;--red:#c8102e;--red2:#e8192f;--gold:#c9a835;--gold-l:#f0d070;--gold-bg:rgba(201,168,53,0.07);--gold-br:rgba(201,168,53,0.3);--blue:#2563eb;--blue-bg:rgba(37,99,235,0.1);--blue-br:rgba(37,99,235,0.35);--white:#ffffff;--tx:#e8eef8;--tx2:#8a9ab8;--tx3:#4a5a7a;--green:#28b87a;--br:rgba(255,255,255,0.08);--br2:rgba(255,255,255,0.14);}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--navy);color:var(--tx);min-height:100vh}
+.screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--navy);position:relative;overflow:hidden}
+.screen::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 50% at 30% 0%,rgba(200,16,46,0.12),transparent 60%),radial-gradient(ellipse 60% 40% at 80% 100%,rgba(201,168,53,0.08),transparent 60%);pointer-events:none}
+.card{background:var(--navy2);border:1px solid var(--navy5);border-radius:16px;padding:44px 40px;max-width:500px;width:100%;text-align:center;position:relative;z-index:1;box-shadow:0 24px 80px rgba(0,0,0,0.5)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--red),#ff4060,var(--red));border-radius:16px 16px 0 0}
+.logo-wrap{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:28px}
+.logo-img{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--red);box-shadow:0 0 20px rgba(200,16,46,0.3)}
+.logo-err{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--red2));display:none;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#fff;flex-shrink:0}
+.logo-text{text-align:left}
+.logo-name{font-size:15px;font-weight:700;color:var(--white);line-height:1.2;letter-spacing:0.3px}
+.logo-dist{font-size:11px;color:var(--tx2);margin-top:3px}
+.logo-slogan{font-size:10px;color:var(--gold);margin-top:2px;letter-spacing:0.5px;text-transform:uppercase}
+.card-title{font-size:26px;font-weight:700;color:var(--white);margin-bottom:6px;letter-spacing:-0.3px}
+.card-sub{font-size:13px;color:var(--tx2);margin-bottom:32px;line-height:1.7}
+.nl{font-size:10px;color:var(--tx3);letter-spacing:1.5px;text-transform:uppercase;text-align:left;margin-bottom:10px;font-family:'DM Mono',monospace}
+.ngrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+.nchip{padding:14px 10px;border-radius:10px;border:1px solid var(--navy4);background:var(--navy3);color:var(--tx2);cursor:pointer;font-size:14px;font-family:'DM Sans',sans-serif;transition:all 0.15s;text-align:center;font-weight:500}
+.nchip:hover{border-color:rgba(200,16,46,0.5);background:rgba(200,16,46,0.08);color:var(--white)}
+.nchip.on{border-color:var(--red);background:rgba(200,16,46,0.12);color:var(--white);font-weight:600}
+.fi{width:100%;padding:13px 14px;background:var(--navy);border:1px solid var(--navy4);border-radius:10px;color:var(--tx);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color 0.2s;margin-bottom:16px}
+.fi:focus{border-color:var(--red)}.fi::placeholder{color:var(--tx3)}
+.btn-red{width:100%;padding:15px;background:linear-gradient(135deg,var(--red),var(--red2));border:none;border-radius:10px;color:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;letter-spacing:0.3px;box-shadow:0 4px 20px rgba(200,16,46,0.35)}
+.btn-red:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(200,16,46,0.45)}
+.erbox{background:rgba(224,68,68,0.1);border:1px solid rgba(224,68,46,0.3);border-radius:8px;padding:10px 14px;font-size:12px;color:#f09090;margin-bottom:14px;display:none;text-align:left}
+.badge-strip{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:20px;padding-top:20px;border-top:1px solid var(--navy4)}
+.cbadge{font-size:10px;font-family:'DM Mono',monospace;border-radius:20px;padding:3px 10px;border:1px solid var(--navy4);color:var(--tx3)}
+.cbadge.red{color:var(--red);border-color:rgba(200,16,46,0.3);background:rgba(200,16,46,0.06)}
+.cbadge.gold{color:var(--gold);border-color:var(--gold-br);background:var(--gold-bg)}
+/* APP */
+#app{display:none;height:100vh;flex-direction:column}
+#hdr{background:var(--navy2);border-bottom:3px solid var(--red);padding:10px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;flex-shrink:0}
+.hlogo{display:flex;align-items:center;gap:10px}
+.hlogo-img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--red)}
+.hlogo-err{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--red2));display:none;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:#fff;flex-shrink:0}
+.hname{font-size:13px;font-weight:700;color:var(--white)}
+.hsub{font-size:11px;color:var(--tx3);margin-top:1px}
+.hpills{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.pill{font-size:11px;border-radius:20px;padding:3px 10px;border:1px solid var(--navy4);color:var(--tx3);background:var(--navy3);font-family:'DM Mono',monospace;white-space:nowrap}
+.pill-ev{color:var(--green);border-color:rgba(40,184,122,0.3);background:rgba(40,184,122,0.08)}
+.pill-u{color:var(--gold);border-color:var(--gold-br);background:var(--gold-bg);cursor:pointer}
+#body{display:flex;flex:1;overflow:hidden}
+#sb{width:200px;flex-shrink:0;background:var(--navy2);border-right:1px solid var(--navy4);overflow-y:auto;padding:14px 10px 0 10px;display:flex;flex-direction:column;gap:2px}
+.sbl{font-size:9px;color:var(--tx3);letter-spacing:2px;text-transform:uppercase;padding:0 6px;margin-bottom:8px;font-family:'DM Mono',monospace}
+.ab{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;border:1px solid transparent;background:transparent;width:100%;text-align:left;font-family:'DM Sans',sans-serif;transition:all 0.12s;margin-bottom:2px}
+.ab:hover{background:var(--navy3)}
+.ab.on{background:var(--navy3);border-color:var(--red);border-left:3px solid var(--red)}
+.aic{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.an{font-size:12px;font-weight:500;color:var(--tx);line-height:1.2}
+.abd{font-size:9px;letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+#panel{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden}
+#ph{padding:11px 18px;border-bottom:1px solid var(--navy4);background:var(--navy2);flex-shrink:0}
+#pt{font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px;color:var(--white)}
+#pd{font-size:11px;color:var(--tx2);margin-top:3px}
+#infobar{padding:9px 18px;font-size:12px;color:var(--tx2);border-bottom:1px solid var(--navy4);background:rgba(200,16,46,0.04);display:none;line-height:1.5}
+#qarea{padding:14px 18px;border-bottom:1px solid var(--navy4);background:var(--navy2);display:none;flex-shrink:0;overflow-y:auto;max-height:280px}
+.qlabel{font-size:9px;color:var(--tx3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:9px;font-family:'DM Mono',monospace}
+.qgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px}
+.qb{font-size:12px;padding:9px 11px;border-radius:8px;border:1px solid var(--navy4);background:var(--navy3);color:var(--tx);cursor:pointer;font-family:'DM Sans',sans-serif;text-align:left;line-height:1.4;transition:all 0.14s}
+.qb:hover{border-color:var(--navy5);background:var(--navy4)}
+.qb.cta{border-color:var(--gold-br);background:var(--gold-bg);color:var(--gold-l)}
+.qb.cta:hover{border-color:var(--gold);background:rgba(201,168,53,0.14)}
+.qb.live{border-color:var(--blue-br);background:var(--blue-bg);color:#93c5fd}
+.qb.live:hover{border-color:var(--blue);background:rgba(37,99,235,0.18)}
+.ctadiv{font-size:9px;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;margin:4px 0 9px;display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace}
+.ctadiv::before,.ctadiv::after{content:'';flex:1;height:1px;background:var(--gold-br)}
+.livediv{font-size:9px;color:#93c5fd;letter-spacing:1.5px;text-transform:uppercase;margin:4px 0 9px;display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace}
+.livediv::before,.livediv::after{content:'';flex:1;height:1px;background:var(--blue-br)}
+#chatarea{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px;background:var(--navy)}
+.estate{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:40px 20px;text-align:center}
+.eico{font-size:34px}.etitle{font-size:17px;font-weight:700;color:var(--white)}.esub{font-size:13px;color:var(--tx2);max-width:360px;line-height:1.7}
+.mwrap{display:flex;flex-direction:column;gap:3px}
+.mwho{font-size:10px;color:var(--tx3);padding:0 4px;font-family:'DM Mono',monospace}.mwho.r{text-align:right}
+.mbadge{display:inline-block;background:var(--gold-bg);border:1px solid var(--gold-br);border-radius:10px;padding:1px 7px;color:var(--gold);font-size:10px;margin-left:5px}
+.mlive{display:inline-block;background:var(--blue-bg);border:1px solid var(--blue-br);border-radius:10px;padding:1px 7px;color:#93c5fd;font-size:10px;margin-left:5px}
+.msg-u{align-self:flex-end;max-width:76%;background:var(--navy3);border:1px solid var(--navy5);border-radius:12px 12px 4px 12px;padding:11px 14px;font-size:13px;line-height:1.6;color:var(--tx)}
+.msg-a{align-self:flex-start;max-width:91%;background:var(--navy2);border:1px solid var(--navy4);border-left:3px solid var(--red);border-radius:4px 12px 12px 12px;padding:13px 15px;font-size:13px;line-height:1.8;white-space:pre-wrap;color:#c8d4e8}
+.msg-a.live-msg{border-left-color:#2563eb}
+.cta-block{margin-top:12px;padding:13px 14px;background:var(--gold-bg);border:1px solid var(--gold-br);border-radius:8px;white-space:pre-wrap;font-size:13px;color:var(--tx);line-height:1.9}
+.cta-hd{font-size:10px;font-weight:700;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:9px;font-family:'DM Mono',monospace}
+.mts{font-size:10px;color:var(--tx3);padding:0 4px;font-family:'DM Mono',monospace}.mts.r{text-align:right}
+.typing{align-self:flex-start;display:flex;gap:4px;padding:12px 14px;background:var(--navy2);border:1px solid var(--navy4);border-left:3px solid var(--red);border-radius:4px 12px 12px 12px}
+.typing.live-typing{border-left-color:#2563eb}
+.td{width:5px;height:5px;border-radius:50%;background:var(--tx3);animation:bp 1.2s infinite ease-in-out}
+.td:nth-child(2){animation-delay:.2s}.td:nth-child(3){animation-delay:.4s}
+@keyframes bp{0%,80%,100%{transform:scale(0.5);opacity:0.3}40%{transform:scale(1);opacity:1}}
+#iarea{padding:12px 18px;border-top:1px solid var(--navy4);background:var(--navy2);flex-shrink:0}
+#irow{display:flex;gap:9px}
+#inp{flex:1;padding:10px 13px;background:var(--navy);border:1px solid var(--navy4);border-radius:10px;color:var(--tx);font-size:13px;font-family:'DM Sans',sans-serif;resize:none;outline:none;line-height:1.5;transition:border-color 0.15s}
+#inp:focus{border-color:var(--red)}#inp::placeholder{color:var(--tx3)}#inp:disabled{opacity:0.4}
+#sbtn{width:42px;height:42px;border-radius:10px;border:none;background:var(--red);color:#fff;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.14s;box-shadow:0 2px 8px rgba(200,16,46,0.3)}
+#sbtn:hover:not(:disabled){background:var(--red2)}
+#sbtn:disabled{opacity:0.35;cursor:not-allowed;background:var(--navy4);box-shadow:none}
+#hint{font-size:10px;color:var(--tx3);margin-top:7px;text-align:center}
+.livedot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:4px;animation:lp 2s infinite;vertical-align:middle}
+@keyframes lp{0%,100%{opacity:1}50%{opacity:0.3}}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--navy4);border-radius:4px}
+@media(max-width:600px){#sb{width:54px}.an,.abd{display:none}.qgrid{grid-template-columns:1fr}.card{padding:32px 24px}}
+
+/* ── CONTENT STUDIO ── */
+#studio{display:none;border-bottom:1px solid var(--navy4);background:var(--navy2);flex-shrink:0;max-height:60vh;overflow-y:auto}
+.studio-hdr{padding:10px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--navy4);cursor:pointer}
+.studio-title{font-size:11px;font-weight:600;color:var(--gold-l);letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace;display:flex;align-items:center;gap:7px}
+.studio-body{padding:16px 18px}
+.studio-tabs{display:flex;gap:6px;margin-bottom:14px}
+.stab{padding:6px 14px;border-radius:20px;border:1px solid var(--navy4);background:var(--navy3);color:var(--tx2);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;transition:all 0.15s}
+.stab.on{border-color:var(--gold-l);background:rgba(249,168,212,0.1);color:var(--gold-l);font-weight:600}
+.studio-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.studio-field{display:flex;flex-direction:column;gap:5px}
+.sfl{font-size:10px;color:var(--tx3);letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace}
+.sfi{padding:9px 12px;background:var(--navy);border:1px solid var(--navy4);border-radius:8px;color:var(--tx);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color 0.2s}
+.sfi:focus{border-color:var(--gold-l)}select.sfi{cursor:pointer}
+.btn-studio{padding:11px 20px;background:linear-gradient(135deg,var(--red),var(--red2));border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;display:flex;align-items:center;gap:8px}
+.btn-studio:hover{opacity:0.9;transform:translateY(-1px)}.btn-studio:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+.studio-preview{display:none;margin-top:16px;gap:16px}
+.studio-preview.show{display:flex;flex-wrap:wrap}
+.post-card{border-radius:12px;overflow:hidden;border:1px solid var(--navy4);background:var(--navy3);flex:1;min-width:260px;max-width:380px}
+.post-img-wrap{position:relative;aspect-ratio:1;background:var(--navy4);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.post-img{width:100%;height:100%;object-fit:cover}
+.post-img-loading{display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--tx2);font-size:12px}
+.post-img-spinner{width:32px;height:32px;border:2px solid var(--navy4);border-top-color:var(--gold-l);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.post-copy{padding:12px 14px}
+.post-platform{font-size:9px;color:var(--gold-l);letter-spacing:1.5px;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:6px}
+.post-text{font-size:12px;color:var(--tx);line-height:1.6;white-space:pre-wrap;max-height:120px;overflow-y:auto}
+.post-actions{display:flex;gap:7px;padding:10px 14px;border-top:1px solid var(--navy4)}
+.dl-btn{flex:1;padding:7px;border-radius:6px;border:1px solid var(--navy4);background:var(--navy);color:var(--tx2);cursor:pointer;font-size:11px;font-family:'DM Sans',sans-serif;transition:all 0.15s;text-align:center}
+.dl-btn:hover{border-color:var(--gold-l);color:var(--gold-l)}
+.reel-wrap{width:100%;max-width:300px;margin:0 auto}
+.reel-frame{position:relative;aspect-ratio:9/16;background:var(--navy);border-radius:12px;overflow:hidden;border:1px solid var(--navy4)}
+.reel-scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transition:opacity 0.5s}
+.reel-scene.active{opacity:1}
+.reel-scene img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.reel-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.8));padding:20px 16px 16px;color:#fff;font-size:14px;line-height:1.5;z-index:2}
+.reel-controls{display:flex;gap:8px;margin-top:10px;justify-content:center}
+.reel-btn{padding:8px 16px;border-radius:20px;border:1px solid var(--navy4);background:var(--navy3);color:var(--tx);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif}
+.reel-btn:hover{border-color:var(--gold-l);color:var(--gold-l)}
+.studio-status{font-size:12px;color:var(--tx2);padding:8px 0;font-family:'DM Mono',monospace;min-height:24px}
+
+/* CONTENT STUDIO */
+.plchip{padding:9px 16px;border-radius:20px;border:1px solid var(--navy4);background:var(--navy3);color:var(--tx2);cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;transition:all 0.15s;font-weight:500}
+.plchip:hover{border-color:var(--gold);color:var(--gold-l)}
+.plchip.on{border-color:var(--gold);background:var(--gold-bg);color:var(--gold-l);font-weight:600}
+.fmtcard{padding:16px 12px;border-radius:12px;border:2px solid var(--navy4);background:var(--navy3);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;text-align:center;width:100%}
+.fmtcard:hover{border-color:var(--gold);background:var(--gold-bg)}
+.fmtcard.on{border-color:var(--gold);background:rgba(201,168,53,0.12)}
+.topchip{padding:8px 14px;border-radius:20px;border:1px solid var(--navy4);background:var(--navy3);color:var(--tx2);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;transition:all 0.15s}
+.topchip:hover{border-color:var(--gold-br);color:var(--gold-l)}
+.topchip.on{border-color:var(--gold);background:var(--gold-bg);color:var(--gold-l)}
+.btn-create{width:100%;padding:14px;background:linear-gradient(135deg,var(--red),var(--red2));border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 4px 20px rgba(200,16,46,0.3)}
+.btn-create:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(200,16,46,0.4)}
+.btn-create:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+.s-status{font-size:12px;color:var(--tx2);padding:8px 0;font-family:'DM Mono',monospace;min-height:22px;text-align:center}
+.post-preview{display:flex;flex-direction:column;gap:14px;align-items:center;padding-bottom:20px}
+.post-img-wrap{width:100%;max-width:420px;aspect-ratio:1;border-radius:12px;overflow:hidden;background:var(--navy3);border:1px solid var(--navy4);display:flex;align-items:center;justify-content:center}
+.post-img-wrap.story{aspect-ratio:9/16;max-width:260px}
+.post-img{width:100%;height:100%;object-fit:cover;border-radius:12px}
+.post-caption{width:100%;max-width:420px;background:var(--navy2);border:1px solid var(--navy4);border-radius:10px;padding:14px;font-size:13px;line-height:1.7;color:var(--tx);white-space:pre-wrap;max-height:200px;overflow-y:auto}
+.post-caption.story{max-width:260px}
+.dl-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.dlbtn{padding:9px 18px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px}
+.dlbtn-img{background:var(--green);color:#fff}
+.dlbtn-txt{background:var(--navy3);color:var(--tx);border:1px solid var(--navy4)}
+.dlbtn-txt:hover{border-color:var(--gold-l)}
+.reel-frame{position:relative;width:220px;height:390px;border-radius:14px;overflow:hidden;background:var(--navy);border:1px solid var(--navy4)}
+.reel-scene{position:absolute;inset:0;opacity:0;transition:opacity 0.5s}
+.reel-scene.on{opacity:1}
+.reel-scene img{width:100%;height:100%;object-fit:cover}
+.reel-scene-text{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.85));padding:20px 14px 14px;color:#fff;font-size:13px;font-weight:600;line-height:1.5;z-index:2}
+.reel-scene-sub{font-size:11px;font-weight:400;margin-top:4px;opacity:0.85}
+.scene-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;color:var(--tx2);font-size:12px}
+.scene-spin{width:28px;height:28px;border:2px solid var(--navy4);border-top-color:var(--gold);border-radius:50%;animation:sspin 0.8s linear infinite}
+@keyframes sspin{to{transform:rotate(360deg)}}
+
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="screen" id="sc-login">
+<div class="card">
+  <div class="logo-wrap">
+    <img src="https://run.imgix.net/b1486006-7f3b-4257-a65e-11e6cb3c70fb/571be7b0-f9e6-45ca-a1c9-4bd45d0a5e80/571be7b0-f9e6-45ca-a1c9-4bd45d0a5e80.png?w=140&auto=compress,format" class="logo-img" alt="WK" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+    <div class="logo-err">WK</div>
+    <div class="logo-text">
+      <div class="logo-name">Walter Kirkland for Congress</div>
+      <div class="logo-dist">Maryland's 5th Congressional District</div>
+      <div class="logo-slogan">Let\'s Rise Up. Together.</div>
+    </div>
+  </div>
+  <div class="card-title">Welcome to Campaign HQ</div>
+  <div class="card-sub">Select your name and jump straight in. All conversations sync live with the whole team.</div>
+  <div class="nl">Select your name</div>
+  <div class="ngrid" id="namegrid"></div>
+  <input type="text" id="username" class="fi" placeholder="Or type your name..." maxlength="20"/>
+  <div class="erbox" id="err-login"></div>
+  <button class="btn-red" onclick="doLogin()">Launch Campaign HQ ⚡</button>
+  <div class="badge-strip">
+    <span class="cbadge red">🗳️ Primary: June 23</span>
+    <span class="cbadge red">⚡ Early Voting: Jun 11–19</span>
+    <span class="cbadge gold">8 AI Agents</span>
+    <span class="cbadge">🔍 Live Research</span>
+  </div>
+</div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div id="hdr">
+    <div class="hlogo">
+      <img src="https://run.imgix.net/b1486006-7f3b-4257-a65e-11e6cb3c70fb/571be7b0-f9e6-45ca-a1c9-4bd45d0a5e80/571be7b0-f9e6-45ca-a1c9-4bd45d0a5e80.png?w=80&auto=compress,format" class="hlogo-img" alt="WK" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+      <div class="hlogo-err">WK</div>
+      <div>
+        <div class="hname">Kirkland Campaign HQ — Shared Command Centre</div>
+        <div class="hsub"><span class="livedot"></span>Live team sync · MD-5 · 8 Agents · Primary June 23 2026</div>
+      </div>
+    </div>
+    <div class="hpills">
+      <span class="pill">8 Agents</span>
+      <span class="pill pill-ev" id="evpill">29d early voting</span>
+      <span class="pill" id="prpill">41d to primary</span>
+      <span class="pill pill-u" id="upill" onclick="doLogout()">👤 —</span>
+      <span class="pill" id="syncpill" onclick="syncDrive()" style="cursor:pointer;color:#93c5fd;border-color:rgba(37,99,235,0.35);background:rgba(37,99,235,0.08)">🔄 Sync Drive</span>
+      <button onclick="openSettings()" style="padding:6px 14px;border-radius:20px;border:1px solid var(--gold-br);background:var(--gold-bg);color:var(--gold-l);font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Mono',monospace;white-space:nowrap;letter-spacing:0.5px">⚙️ SETTINGS</button>
+    </div>
+  </div>
+  <div id="body">
+    <div id="sb"><div class="sbl">Agents</div><div id="agentlist" style="flex:1"></div>
+      <div style="margin-top:auto;padding:10px 0;border-top:1px solid var(--navy4);flex-shrink:0;background:var(--navy2);position:sticky;bottom:0">
+        <button id="ab-create" onclick="openStudio()" style="display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:10px;border:2px solid var(--gold-br);background:var(--gold-bg);width:100%;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;margin-bottom:2px">
+          <div style="width:30px;height:30px;border-radius:7px;background:rgba(201,168,53,0.2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">✊</div>
+          <div style="min-width:0;text-align:left">
+            <div style="font-size:12px;font-weight:700;color:var(--gold-l);line-height:1.2">Create Content</div>
+            <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-top:1px">Posts · Reels · Ads</div>
+          </div>
+        </button>
+      </div>
+    </div>
+    <div id="panel">
+      <div id="ph"><div id="pt">👋 Welcome to HQ</div><div id="pd">Select an agent from the sidebar</div></div>
+      <div id="infobar"></div>
+      <div id="qarea">
+        <div class="qlabel">Ask this agent</div>
+        <div class="qgrid" id="qgrid"></div>
+        <div class="ctadiv">⚡ Call To Action — rapid team tasks</div>
+        <div class="qgrid" id="ctagrid"></div>
+        <div class="livediv">🔍 Live Intel — searches internet for latest news</div>
+        <div class="qgrid" id="livegrid"></div>
+      </div>
+
+      <!-- CONTENT STUDIO — shows for Content Engine agent -->
+      <div id="studio">
+        <div class="studio-hdr" onclick="toggleStudio()">
+          <div class="studio-title">
+            <span>🎬</span> Content Studio — Create Posts &amp; Reels with AI Images
+            <span style="font-size:10px;color:var(--tx3)">(ChatGPT DALL-E 3)</span>
+          </div>
+          <span id="studio-toggle" style="color:var(--tx3);font-size:12px">▼ Open</span>
+        </div>
+        <div id="studio-inner" style="display:none">
+          <div class="studio-body">
+            <div class="studio-tabs" id="studio-tabs">
+              <button class="stab on" data-tab="post" onclick="switchTab(this,'post')">📸 Post</button>
+              <button class="stab" data-tab="story" onclick="switchTab(this,'story')">📱 Story</button>
+              <button class="stab" data-tab="reel" onclick="switchTab(this,'reel')">🎬 Reel</button>
+              <button class="stab" data-tab="ad" onclick="switchTab(this,'ad')">📢 Ad</button>
+            </div>
+
+            <div class="studio-row">
+              <div class="studio-field">
+                <div class="sfl">Platform</div>
+                <select class="sfi" id="s-platform">
+                  <option value="Instagram">Instagram</option>
+                  <option value="Facebook">Facebook</option>
+                  <option value="TikTok">TikTok</option>
+                  <option value="LinkedIn">LinkedIn</option>
+                  <option value="Twitter/X">Twitter / X</option>
+                </select>
+              </div>
+              <div class="studio-field">
+                <div class="sfl">Tone</div>
+                <select class="sfi" id="s-tone">
+                  <option value="Inspiring and community-focused">Inspiring</option>
+                  <option value="Urgent and action-oriented">Urgent</option>
+                  <option value="Personal and authentic">Personal</option>
+                  <option value="Bold and confident">Bold</option>
+                  <option value="Empathetic and warm">Empathetic</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="studio-field" style="margin-bottom:12px">
+              <div class="sfl">Topic / Message</div>
+              <textarea class="sfi" id="s-topic" rows="2" placeholder="e.g. Olympic endorsements, early voting June 11, federal workers, Walter's story..."></textarea>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+              <button class="btn-studio" id="s-genbtn" onclick="generateContent()">
+                ✨ Generate Post + Image
+              </button>
+              <div class="studio-status" id="s-status"></div>
+            </div>
+
+            <div class="studio-preview" id="s-preview"></div>
+          </div>
+        </div>
+      </div>
+      <div id="chatarea">
+        <div class="estate">
+          <div class="eico">✊</div>
+          <div class="etitle">Let\'s Rise Up. Together.</div>
+          <div class="esub">Select an agent. <strong style="color:var(--white)">White</strong> = expert analysis. <strong style="color:var(--gold-l)">Gold ⚡</strong> = instant Call To Action. <strong style="color:#93c5fd">Blue 🔍</strong> = live internet research on Walter, MD-5 news and winning campaign tactics. Type anything below.</div>
+        </div>
+      </div>
+      <div id="iarea">
+        <div id="irow">
+          <textarea id="inp" rows="2" placeholder="Select an agent first..." disabled></textarea>
+          <button id="sbtn" disabled onclick="sendMsg()">↑</button>
+        </div>
+        <div id="hint">Enter to send · Shift+Enter for new line · 🔍 prefix your message with "search:" for live research</div>
+      </div>
+    </div>
+  
+    <!-- ═══ CONTENT STUDIO PANEL ═══ -->
+    <div id="studio-panel" style="display:none;flex:1;flex-direction:column;overflow:hidden">
+      <!-- Header -->
+      <div style="padding:12px 20px;border-bottom:1px solid var(--navy4);background:var(--navy2);flex-shrink:0;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--gold-l)">✊ Create Content — Walter Kirkland for Congress</div>
+          <div style="font-size:11px;color:var(--tx2);margin-top:2px">Claude writes copy · ChatGPT Images 2.0 generates visuals · Auto-post or schedule · Download ready to post</div>
+        </div>
+        <button onclick="closeStudio()" style="padding:7px 14px;border-radius:8px;border:1px solid var(--navy4);background:var(--navy3);color:var(--tx2);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif">← Agents</button>
+      </div>
+
+      <!-- Controls + Preview -->
+      <div style="flex:1;overflow-y:auto;display:flex;gap:0">
+
+        <!-- Left controls -->
+        <div style="width:300px;flex-shrink:0;padding:18px;border-right:1px solid var(--navy4);display:flex;flex-direction:column;gap:14px;overflow-y:auto">
+
+          <!-- Platform -->
+          <div>
+            <div style="font-size:10px;color:var(--tx3);letter-spacing:1.5px;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:9px">① Platform</div>
+            <div style="display:flex;flex-wrap:wrap;gap:7px" id="s-plats">
+              <button class="plchip on" data-v="Instagram" onclick="sPick(this,'plat')">📷 Instagram</button>
+              <button class="plchip" data-v="Facebook" onclick="sPick(this,'plat')">👥 Facebook</button>
+              <button class="plchip" data-v="TikTok" onclick="sPick(this,'plat')">🎵 TikTok</button>
+              <button class="plchip" data-v="Twitter/X" onclick="sPick(this,'plat')">𝕏 Twitter/X</button>
+              <button class="plchip" data-v="LinkedIn" onclick="sPick(this,'plat')">💼 LinkedIn</button>
+            </div>
+          </div>
+
+          <!-- Format -->
+          <div>
+            <div style="font-size:10px;color:var(--tx3);letter-spacing:1.5px;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:9px">② What to create</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px" id="s-fmts">
+              <button class="fmtcard on" data-v="post" onclick="sPick(this,'fmt')"><div style="font-size:22px">📸</div><div style="font-size:12px;font-weight:600;color:var(--white);margin-top:5px">Post</div><div style="font-size:10px;color:var(--tx3);margin-top:2px">Square</div></button>
+              <button class="fmtcard" data-v="story" onclick="sPick(this,'fmt')"><div style="font-size:22px">📱</div><div style="font-size:12px;font-weight:600;color:var(--white);margin-top:5px">Story</div><div style="font-size:10px;color:var(--tx3);margin-top:2px">9:16</div></button>
+              <button class="fmtcard" data-v="reel" onclick="sPick(this,'fmt')"><div style="font-size:22px">🎬</div><div style="font-size:12px;font-weight:600;color:var(--white);margin-top:5px">Reel</div><div style="font-size:10px;color:var(--tx3);margin-top:2px">4 scenes</div></button>
+            </div>
+          </div>
+
+          <!-- Topics -->
+          <div>
+            <div style="font-size:10px;color:var(--tx3);letter-spacing:1.5px;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:9px">③ Topic (tap or type)</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px" id="s-topics">
+              <button class="topchip" data-v="Olympic Gold Medalist endorsements — Dr. Tommie Smith and Dr. Edwin Moses back Walter" onclick="sTopic(this)">🏆 Olympic Endorsements</button>
+              <button class="topchip" data-v="Early voting opens June 11 — every early vote is locked in, Juneteenth June 19" onclick="sTopic(this)">⚡ Early Voting Jun 11</button>
+              <button class="topchip" data-v="Walter's origin story — single mother, Rutgers scholarship, Penn Relays champion, 100 Black Men founder" onclick="sTopic(this)">💬 Walter's Story</button>
+              <button class="topchip" data-v="Protecting 75,000 federal workers in MD-5 — Walter will fight for your jobs and pensions" onclick="sTopic(this)">🏛️ Federal Workers</button>
+              <button class="topchip" data-v="Obama letter of support endorses Walter Kirkland for Congress MD-5" onclick="sTopic(this)">🇺🇸 Obama Endorsement</button>
+              <button class="topchip" data-v="Donate to Walter Kirkland for Congress — people-powered no PAC money" onclick="sTopic(this)">💰 Donation Ask</button>
+              <button class="topchip" data-v="Get out and vote June 23 primary — Walter Kirkland for MD-5 Congress" onclick="sTopic(this)">🗳️ Primary Day Jun 23</button>
+            </div>
+            <textarea id="s-topic-input" style="width:100%;padding:10px 12px;background:var(--navy);border:1px solid var(--navy4);border-radius:8px;color:var(--tx);font-size:13px;font-family:'DM Sans',sans-serif;resize:none;outline:none;line-height:1.5;height:70px" placeholder="Or type your own topic..."></textarea>
+          </div>
+
+          <!-- Generate button -->
+          <button class="btn-create" id="s-genbtn" onclick="sGenerate()">
+            ✨ Generate with ChatGPT Images 2.0
+          </button>
+          <div class="s-status" id="s-status"></div>
+
+        </div>
+
+        <!-- Right preview -->
+        <div style="flex:1;padding:24px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:0" id="s-preview-area">
+          <div style="text-align:center;padding:60px 20px;color:var(--tx2)">
+            <div style="font-size:48px;margin-bottom:16px">🎨</div>
+            <div style="font-size:16px;font-weight:600;color:var(--white);margin-bottom:8px">Your content will appear here</div>
+            <div style="font-size:13px;line-height:1.7">Select a platform and format,<br>pick a topic, then click Generate</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+  <!-- ═══ SETTINGS MODAL ═══ -->
+  <div id="settings-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--navy2);border:1px solid var(--navy4);border-radius:16px;padding:28px;max-width:520px;width:100%;max-height:85vh;overflow-y:auto;position:relative">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--red),#ff4060);border-radius:16px 16px 0 0"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div>
+          <div style="font-size:16px;font-weight:700;color:var(--white)">⚙️ Platform Settings</div>
+          <div style="font-size:12px;color:var(--tx2);margin-top:3px">Add credentials to enable auto-posting</div>
+        </div>
+        <button onclick="closeSettings()" style="padding:6px 12px;border-radius:8px;border:1px solid var(--navy4);background:var(--navy3);color:var(--tx2);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px">✕ Close</button>
+      </div>
+
+      <!-- FACEBOOK -->
+      <div style="background:var(--navy3);border:1px solid var(--navy4);border-radius:10px;padding:16px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <span style="font-size:18px">👥</span>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--white)">Facebook Page</div>
+            <div style="font-size:11px;color:var(--tx3)">Auto-post to Walter's Facebook Page</div>
+          </div>
+          <div id="fb-status" style="margin-left:auto;font-size:10px;padding:3px 8px;border-radius:10px;background:var(--navy4);color:var(--tx3)">Not set</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div>
+            <div style="font-size:10px;color:var(--tx3);margin-bottom:4px;font-family:'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase">Facebook Page ID</div>
+            <input type="text" id="fb-page-id" style="width:100%;padding:9px 12px;background:var(--navy);border:1px solid var(--navy4);border-radius:8px;color:var(--tx);font-size:13px;font-family:'DM Mono',monospace;outline:none" placeholder="e.g. 123456789012345"/>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--tx3);margin-bottom:4px;font-family:'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase">Page Access Token (long-lived)</div>
+            <input type="password" id="fb-token" style="width:100%;padding:9px 12px;background:var(--navy);border:1px solid var(--navy4);border-radius:8px;color:var(--tx);font-size:13px;font-family:'DM Mono',monospace;outline:none" placeholder="EAABwzLixnjYBO..."/>
+          </div>
+          <div style="font-size:11px;color:var(--tx3);line-height:1.6">Get token: <a href="https://developers.facebook.com/tools/explorer/" target="_blank" style="color:var(--gold)">Facebook Graph API Explorer</a> → select your page → generate token with pages_manage_posts permission</div>
+        </div>
+      </div>
+
+      <!-- INSTAGRAM -->
+      <div style="background:var(--navy3);border:1px solid var(--navy4);border-radius:10px;padding:16px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <span style="font-size:18px">📷</span>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--white)">Instagram Business</div>
+            <div style="font-size:11px;color:var(--tx3)">Uses same Facebook token + IG Account ID</div>
+          </div>
+          <div id="ig-status" style="margin-left:auto;font-size:10px;padding:3px 8px;border-radius:10px;background:var(--navy4);color:var(--tx3)">Not set</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--tx3);margin-bottom:4px;font-family:'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase">Instagram Business Account ID</div>
+          <input type="text" id="ig-account-id" style="width:100%;padding:9px 12px;background:var(--navy);border:1px solid var(--navy4);border-radius:8px;color:var(--tx);font-size:13px;font-family:'DM Mono',monospace;outline:none" placeholder="e.g. 17841400008460056"/>
+          <div style="font-size:11px;color:var(--tx3);margin-top:6px;line-height:1.6">Find in: Facebook Graph Explorer → GET /{page-id}?fields=instagram_business_account</div>
+        </div>
+      </div>
+
+      <!-- TWITTER/X -->
+      <div style="background:var(--navy3);border:1px solid var(--navy4);border-radius:10px;padding:16px;margin-bottom:12px;opacity:0.7">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:18px">𝕏</span>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--white)">Twitter / X</div>
+            <div style="font-size:11px;color:#f09090)">API write access requires $100/month paid plan — copy + best time shown instead</div>
+          </div>
+          <div style="margin-left:auto;font-size:10px;padding:3px 8px;border-radius:10px;background:rgba(224,68,68,0.15);color:#f09090">Paid API</div>
+        </div>
+      </div>
+
+      <!-- TIKTOK -->
+      <div style="background:var(--navy3);border:1px solid var(--navy4);border-radius:10px;padding:16px;margin-bottom:20px;opacity:0.7">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:18px">🎵</span>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--white)">TikTok</div>
+            <div style="font-size:11px;color:var(--tx3)">Video-only API — copy + best time shown instead</div>
+          </div>
+          <div style="margin-left:auto;font-size:10px;padding:3px 8px;border-radius:10px;background:var(--navy4);color:var(--tx3)">Manual only</div>
+        </div>
+      </div>
+
+      <button onclick="saveSettingsFn()" style="width:100%;padding:13px;background:linear-gradient(135deg,var(--red),var(--red2));border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">Save Settings</button>
+      <div id="settings-status" style="font-size:12px;color:var(--green);text-align:center;margin-top:10px;min-height:18px"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ═══ CREDENTIALS ═══
+var SB_URL='https://dyjozutgzepyymaygckz.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5am96dXRnemVweXltYXlnY2t6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNjUxMzUsImV4cCI6MjA5NTc0MTEzNX0.EwPdEWKFFPtfguHa8ZIWidUD_mPRcPX4fxypQCBj6wQ';
+var PROXY_URL='https://dyjozutgzepyymaygckz.supabase.co/functions/v1/rapid-handler';
+var APPS_SCRIPT_URL='';
+var DRIVE_CTX=''; // populated from Google Drive on startup
+
+// ═══ CAMPAIGN CONTEXT ═══
+var TODAY = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+var DAYS_TO_EV = Math.ceil((new Date('2026-06-11')-new Date())/86400000);
+var DAYS_TO_PRIMARY = Math.ceil((new Date('2026-06-23')-new Date())/86400000);
+
+var CTX=`[WALTER KIRKLAND FOR CONGRESS — MD-5 | LIVE CAMPAIGN DATA]
+TODAY: ${TODAY}. Days to early voting: ${DAYS_TO_EV}. Days to primary: ${DAYS_TO_PRIMARY}.
+Website: walterkirklandforcongress.com | Phone: 240.360.7753 | ActBlue: secure.actblue.com/donate/wkwebsite
+SOCIAL MEDIA: Facebook: facebook.com/KirklandForCongress | Instagram: @walterkirkland1 (instagram.com/walterkirkland1) | TikTok: @walterrkirkland (tiktok.com/@walterrkirkland) | LinkedIn: linkedin.com/in/walter-r-kirkland-ba36b756 | YouTube: @WalterKirklandforCongress-MD5
+SOCIAL MEDIA GAPS (urgent): No TikTok account — competitors like Harry Dunn are very active there. No X/Twitter account — political press lives there. Recommend creating @KirklandMD5 on both immediately.
+
+CANDIDATE: Walter R. Kirkland. Slogan: \"Let\u2019s Rise Up. Together.\"
+PRIMARY: June 23 2026 | EARLY VOTING: June 11-19 (June 19 = Juneteenth — exercise freedom. Every early vote is locked.)
+
+BIO: Raised by single mother Mount Vernon NY. Full athletic scholarship Rutgers — 4-year All-American track & field, Penn Relays champion, Track & Field Hall of Famer. 30+ yrs corporate: Xerox, Honeywell, Samsung. Founding President: 100 Black Men of Prince George's County. Executive Chair: March of Dimes PG County. Host: Kirkland's Korner. Lifetime Achievement Award from Office of the President. Personal experience with gun violence and mental health. People-powered outsider — NO PAC money.
+
+ENDORSEMENTS: Obama letter of support. Olympic Gold Medalist Dr. Tommie Smith ("Champions Choose Walter"). Two-Time Olympic Gold Medalist Dr. Edwin Moses. Dr. George Fraser. Lionel Green WBGR Network. WHUR 96.3 FM 2026 Hometown History Maker. Appeared with Governor Martin O'Malley March 2026.
+
+ISSUES (18 areas): Lower costs, protect Social Security/Medicare, senior property tax protections, safer communities, local economy, healthcare access, transportation, democracy/civil rights, youth STEM education, veterans/military families (NAS Patuxent River, Joint Base Andrews), energy/environment, federal employees (75,000+ in district), foreign policy, housing affordability, immigration reform, technology/AI/innovation, minority business enterprises, labour/workforce, small businesses.
+
+DISTRICT: MD-5 — Prince George's, Charles, Calvert, St. Mary's, parts Anne Arundel. ~783k residents, 40% Black/African American. 75,000+ federal workers, military families.
+
+TOP RIVALS: Adrian Boafo (Hoyer endorsed, frontrunner, state delegate), Harry Dunn (Jan 6 Capitol police, national profile), Rushern Baker III (ex-county exec), Wala Blegay (county council), Nicole Williams (state delegate), Arthur Ellis (state senator USAF veteran), Reuben Collins II (Charles County). 24 total Dem candidates. Safe Democratic district — primary IS the election.
+
+WALTER'S UNIQUE DIFFERENTIATORS: Only candidate who built lasting institution in MD-5 before running (100 Black Men PG County) · Lifetime Achievement Award from President's Office · Penn Relays champion + Hall of Famer · Obama letter + Two Olympic Gold Medalists — no other candidate has this · Lived experience gun violence and mental health · NO PAC money · 75,000 federal workers — strongest federal employee protection platform · Mental health as central platform issue.
+
+WINNING CAMPAIGN TACTICS TO APPLY:
+Obama 2008/2012: Grassroots ground game, early vote banking, "Yes We Can" outsider narrative, youth mobilisation, social media authenticity, community organising over advertising.
+Trump 2016: Outsider anti-establishment narrative (adapt ethically), rally energy, "drain the swamp" equivalent = "I owe nothing to party bosses", media attention through bold statements.
+Biden 2020: Coalition building, empathy narrative, senior vote protection, union outreach, steady reliable leadership message.
+AOC 2018 first win (upset vs establishment): Community canvassing, social media presence, authentic outsider story, youth mobilisation, progressive issues + economic anxiety.
+Raphael Warnock Georgia 2020: Faith community mobilisation, GOTV infrastructure, early voting push, Black voter turnout operations.
+Cori Bush Missouri 2020: Grassroots funding, community trust, persistence (ran twice), authentic story, volunteer army.
+MARKETING TACTICS THAT CHANGE MINDS: Social proof (endorsements visible at every touchpoint) · Repetition (7 touchpoints before decision) · Identity-based messaging ("people like me vote for Walter") · Scarcity/urgency (early voting window closing) · Story over statistics (Miss Gloria cutting pills in half) · Visual social proof (Olympic champions = credibility transfer).`;
+
+var CTA_RULES='\n\n---\nCRITICAL: After your full expert answer add this EXACT heading:\n## Call To Action\n\n8-12 numbered items. STRICT RULES:\n- Plain English a 12-year-old understands\n- ONE physical task per line\n- Start each with: THIS HOUR / TODAY / THIS WEEK / JUNE 9 / JUNE 11 / JUNE 19 / JUNE 23\n- Something a volunteer can DO immediately — max 20 words\n- Bold the action verb\nEnd with one bold sentence: "THE MOST IMPORTANT THING:" — single highest-leverage action right now.';
+
+var LIVE_PREFIX='You have access to web search. SEARCH THE INTERNET FIRST before answering. Search for: (1) latest news about Walter Kirkland MD-5 Congress 2026, (2) latest news about the MD-5 congressional race Maryland 2026, (3) relevant winning political tactics for similar races. Then provide your expert analysis incorporating what you find. Be specific about what current news means for Walter\'s campaign right now.\n\n';
+
+var TEAM=['Nigel','Eva','Karen','Walter'];
+
+var AGENTS=[
+  {id:'strategist',ico:'🧠',col:'#7C6FE0',bg:'rgba(124,111,224,0.15)',tc:'#a89ef0',name:'Campaign Strategist',badge:'COMMAND',desc:'10x thinking, sprint planning, decision frameworks + live political intelligence',
+   sys:'You are Chief Campaign Strategist for Walter Kirkland MD-5 congressional campaign.\n'+CTX+'\nUse 10x thinking, 1-3-5 prioritisation, decision frameworks, pre-mortem risk.\nFormat:\n## Strategic Assessment\n## 10x Angle\n## Priority Framework (THE ONE / THE THREE / THE FIVE)\n## Strategic Risk\nApply winning tactics from Obama, AOC, Warnock, Cori Bush playbooks to Walter\'s situation. Always leverage Olympic endorsements, Obama letter, outsider status, 75k federal workers.',
+   qs:['What is our 3-week sprint plan to the primary?','How do we use Olympic endorsements for maximum impact?','How do we beat Boafo using the AOC 2018 upset playbook?','With early voting June 11, what changes in our ground strategy?'],
+   ctaqs:['Call To Action for our 3-week sprint right now','Call To Action to maximise early voting June 11-19'],
+   liveqs:['Search: What is the latest news about Walter Kirkland MD-5 2026 and give me a strategy update','Search: What tactics won recent upset congressional races and how do we apply them to MD-5']},
+  {id:'content',ico:'✍️',col:'#E05577',bg:'rgba(224,85,119,0.15)',tc:'#f0849e',name:'Content Engine',badge:'SOCIAL',desc:'Platform-native posts using real endorsements + live trending content tactics',
+   sys:'You are Content Director for Walter Kirkland MD-5 campaign.\n'+CTX+'\nUse PAS, AIDA, Before/After, Social Proof. Voice: authentic, warm, neighbour not politician.\nSpecs: Facebook 150-250 words + CTA; Instagram 100-150 words + 15 hashtags; LinkedIn 200-300 words; X/Twitter under 280 chars; TikTok 50-80 words + hashtags.\nApply Obama 2008 authenticity, AOC social media directness, Warnock faith community messaging.\nAlways: (1) Primary version (2) Option B (3) Recommendation (4) Hashtags.',
+   qs:['Post announcing Olympic Gold Medalist endorsements','TikTok: Walter — Penn Relays champion to Congress (60 secs)','Facebook: Walter\'s story — single mum, scholarship, 100 Black Men','Early voting urgency posts for all platforms — starts June 11'],
+   ctaqs:['Call To Action to get content posted today using our real endorsements','Call To Action for our early voting social blitz Jun 11-19'],
+   liveqs:['Search: What content is working right now in the MD-5 race and what should Walter post today','Search: What social media tactics won recent congressional upsets that we can copy for Walter']},
+  {id:'ads',ico:'📢',col:'#E08B30',bg:'rgba(224,139,48,0.15)',tc:'#f0b060',name:'Paid Ads Agent',badge:'PAID',desc:'Facebook & Google ads with exact character counts, A/B variants + live audience intelligence',
+   sys:'You are Paid Media Director for Walter Kirkland MD-5 campaign.\n'+CTX+'\nSTRICT LIMITS: Facebook: text 125 chars above fold; headline 40 MAX; description 30 MAX. Google: headline 30 MAX; description 90 MAX.\nApply Obama 2012 micro-targeting, Biden 2020 senior targeting, AOC small-dollar fundraising tactics.\nFor every ad: (1) Primary with [char count] (2) Three A/B variants (3) Audience targeting (4) Objective.',
+   qs:['Facebook ads using Olympic Gold Medalist endorsements','Google ads for federal workers — "Walter protects your job"','GOTV early voting urgency ads June 11-19','Donation ads targeting Black professionals 35-65 PG County'],
+   ctaqs:['Call To Action to launch our first Facebook ads today','Call To Action to run early voting ads June 9-19'],
+   liveqs:['Search: What Facebook ad tactics are working in Maryland 2026 congressional races','Search: How did winning campaigns target federal workers and military families digitally']},
+  {id:'outreach',ico:'📬',col:'#28B87A',bg:'rgba(40,184,122,0.15)',tc:'#60d4a0',name:'Outreach Agent',badge:'OUTREACH',desc:'Cold emails, donor sequences, press pitches + live media opportunity alerts',
+   sys:'You are Outreach Director for Walter Kirkland MD-5 campaign.\n'+CTX+'\nWebsite: walterkirklandforcongress.com | Phone: 240.360.7753\nFormula: Subject (5-7 words) → Why them specifically → Credibility → Low-friction ask → P.S. line. Max 75 words.\nSequence Days 0,1,3,5,7: Value → Story → Social proof → Objection → CTA.\nApply Obama small-dollar email tactics, AOC grassroots fundraising methods.\nAlways include P.S. line.',
+   qs:['Press pitch to Maryland Matters using Olympic endorsements as hook','5-email donor sequence referencing Obama letter + Olympic endorsements','Cold email to local pastor — use Tommie Smith endorsement','Email to Washington Informer for Walter profile story'],
+   ctaqs:['Call To Action to send endorsement outreach this week','Call To Action for our press outreach campaign today'],
+   liveqs:['Search: What Maryland political journalists and media outlets are covering MD-5 race right now','Search: Which endorsers and community leaders in PG County and Southern Maryland should Walter approach']},
+  {id:'intel',ico:'🔍',col:'#E07830',bg:'rgba(224,120,48,0.15)',tc:'#f0a060',name:'Competitor Intel',badge:'INTEL',desc:'Live opponent monitoring, positioning gaps, counter-messaging from current news',
+   sys:'You are Campaign Intelligence Director for Walter Kirkland MD-5 campaign.\n'+CTX+'\nOur strengths: 100 Black Men founder, Penn Relays champion, Lifetime Achievement Award, Obama letter, Olympic Gold Medalists Tommie Smith + Edwin Moses, WBGR, Dr. George Fraser, WHUR, Gov O\'Malley appearance, gun violence + mental health lived experience, NO PAC money.\nOur weaknesses: low name recognition, limited fundraising, no elected office.\nFormat:\n## Intelligence Brief: [Subject]\n## Competitor Profile\n## Gaps & Opportunities for Walter\n## Counter-Positioning\n## Risk Assessment\nBe direct. Do not sugarcoat.',
+   qs:['How do Olympic endorsements compete with Boafo\'s Hoyer backing?','How do we counter Dunn\'s national Jan 6 profile?','What messaging gaps — mental health, gun violence — is nobody filling?','Walter\'s strongest contrast messages vs the whole field?'],
+   ctaqs:['Call To Action to counter Boafo\'s advantage this week','Call To Action to own the outsider + champion narrative immediately'],
+   liveqs:['Search: What is Adrian Boafo doing right now in the MD-5 race and how do we counter it','Search: Latest news on all MD-5 2026 Democratic primary candidates — find Walter\'s opening']},
+  {id:'voter',ico:'🗳️',col:'#3A9FE0',bg:'rgba(58,159,224,0.15)',tc:'#70c0f0',name:'Voter Targeting',badge:'TARGETING',desc:'Live voter intelligence, GOTV plans, early voting strategy from winning campaigns',
+   sys:'You are Voter Targeting & GOTV Director for Walter Kirkland MD-5 campaign.\n'+CTX+'\nKey segments: Black voters 40% (base — use 100 Black Men, Olympic champions, Obama letter); Federal workers 75,000+ (federal employee protection); Military families NAS Patuxent + JB Andrews; Seniors 60+ (Social Security/Medicare/property tax); Young families (housing/education); Small + minority business owners; DC commuters; Mental health advocates.\nGOTV priority: 1st early voting June 11-19; 2nd June 19 Juneteenth (exercise freedom); 3rd Primary June 23.\nApply Warnock Georgia GOTV model, Obama early vote banking, Stacey Abrams voter registration tactics.',
+   qs:['GOTV plan for 75,000+ federal workers in MD-5','Messaging for Black voters using Olympic champion endorsements','Early voting GOTV using Obama letter + Tommie Smith endorsement','Veterans messaging — NAS Patuxent River and Joint Base Andrews'],
+   ctaqs:['Call To Action to start our federal worker GOTV operation today','Call To Action to bank maximum early votes June 11-19'],
+   liveqs:['Search: What voter turnout issues are happening in MD-5 and Prince George\'s County right now','Search: What GOTV tactics are working in 2026 Maryland primaries and how does Walter use them']},
+  {id:'events',ico:'📍',col:'#9B5DE5',bg:'rgba(155,93,229,0.15)',tc:'#c090f0',name:'Events & Ground',badge:'GROUND',desc:'Town halls, canvassing scripts, volunteer management + live event intelligence',
+   sys:'You are Ground Game & Events Director for Walter Kirkland MD-5 campaign.\n'+CTX+'\nFrom June 11: ask "Have you voted early yet?" — direct supporters to nearest early voting site.\nApply Obama 2008 community organising model, Cori Bush volunteer army tactics, AOC neighbourhood canvassing approach.\nFor events: Venue + agenda + prep + volunteer roles + debrief.\nFor scripts: Opener using Walter\'s real story → credentials → issue hook → ask → 3 objections → leave-behind.\nFor volunteers: Recruitment ask → 15-min training → weekly schedule → retention.',
+   qs:['Town hall script using Walter\'s Penn Relays and 100 Black Men story','Canvassing script for PG County — federal worker messaging','Volunteer recruitment plan for final 6 weeks across 4 counties','Phone bank script using Olympic champion endorsements for credibility'],
+   ctaqs:['Call To Action to deploy canvassing team this weekend','Call To Action to recruit 20 volunteers in 7 days'],
+   liveqs:['Search: What community events are happening in Prince George\'s and Charles County that Walter should attend','Search: What ground game tactics are winning 2026 congressional primaries right now']},
+  {id:'digital',ico:'💻',col:'#c8102e',bg:'rgba(200,16,46,0.12)',tc:'#ff8090',name:'Digital Optimizer',badge:'DIGITAL',desc:'Live website performance, SEO opportunities, donation optimization + competitor digital intel',
+   sys:'You are Digital Director for Walter Kirkland MD-5 campaign.\n'+CTX+'\nWebsite: walterkirklandforcongress.com | Donation: ActBlue\nURGENT: Ballotpedia survey NOT completed — costs Walter daily. Fix today.\nCRO: Olympic endorsements + Obama letter are unused conversion assets. Add social proof near every CTA.\nApply Obama 2008 digital fundraising tactics, AOC small-dollar donation optimization, Biden 2020 email list building.\nSEO: Keywords "MD-5 Congress 2026" "Walter Kirkland Maryland" "Kirkland for Congress".\nRecs: Quick Wins this week → Medium Effort → A/B Tests.',
+   qs:['How do we use Obama letter + Olympic endorsements to boost donations?','Audit homepage — top 3 things that immediately increase conversions?','Why hasn\'t Ballotpedia survey been completed and what does it cost?','SEO strategy to rank for MD-5 Congress 2026 before the primary'],
+   ctaqs:['Call To Action to fix the website and donation page today','Call To Action to complete Ballotpedia and boost SEO this week'],
+   liveqs:['Search: How is Walter Kirkland\'s website performing vs competitors in MD-5 — what SEO gaps exist','Search: What digital campaign tactics are working in 2026 congressional races for challenger candidates']}
+,
+  {id:'viral',ico:'🚀',col:'#7c3aed',bg:'rgba(124,58,237,0.15)',tc:'#a78bfa',name:'Viral Growth Agent',badge:'VIRAL',desc:'June 6 momentum strategy · 7 viral frameworks · scroll-stopping content · daily donor pressure',
+   sys:`You are a viral social media growth strategist and campaign momentum director for Walter Kirkland for Congress MD-5 2026.
+
+WALTER’S SOCIAL MEDIA:
+Facebook: facebook.com/KirklandForCongress
+Instagram: @walterkirkland1 (instagram.com/walterkirkland1)
+TikTok: @walterrkirkland (tiktok.com/@walterrkirkland)
+YouTube: @WalterKirklandforCongress-MD5
+Website: walterkirklandforcongress.com
+Donate: secure.actblue.com/donate/wkwebsite
+Drive folder: drive.google.com/drive/folders/139qhMjkIPBqb16i4HVBem8n6y5phgTYl
+
+CRITICAL CAMPAIGN TIMELINE:
+June 6 = LAST PRE-EARLY VOTE MOMENTUM WEEKEND. Must be the biggest visible action day.
+June 11 = Early voting opens. From this day: ask every voter "Have you voted early yet?"
+June 19 = Juneteenth early voting. Frame as exercising the freedom ancestors died for.
+June 23 = Primary Day. The ONLY day that matters.
+
+JUNE 6 STRATEGY (execute immediately):
+1. PEOPLE-POWERED MESSAGE. Repeat daily everywhere: "I’m not backed by insiders. I’m backed by people." This is the core contrast line.
+2. FORWARD TOGETHER DAY OF ACTION. Morning canvass + small-business stop + church/community visit + evening livestream fundraiser. Film EVERYTHING. Every moment is content.
+3. HIT LOW-TURNOUT VOTERS HARD. The win is finding people who already like Walter and making sure they vote early or have a plan. Not persuasion. Mobilisation.
+4. CONTRAST WITHOUT NAMING NAMES. Line: "Some campaigns have endorsements. Some have big checks. We have people knocking doors, making calls, and showing up."
+5. DAILY DONATION PRESSURE. Goal: "1,000 people giving $10 before early voting starts." Create urgency and movement energy. Show a live thermometer.
+6. BEST ISSUE LANES: Federal workers. Cost of living. Healthcare. Youth opportunity. Small businesses. Government that actually shows up.
+7. MAKE IT FEEL BIGGER THAN IT IS. Public donor thermometer + volunteer photos + daily canvass clips + testimonials. Goal: make people say "Walter is everywhere."
+
+7 VIRAL CONTENT FRAMEWORKS TO APPLY:
+Framework 1 - VIRAL TRENDS: Analyse latest viral Instagram/TikTok trends in political campaigns. Generate 5 scroll-stopping Reel ideas with high share potential. Be specific. No fluff.
+Framework 2 - PAIN INTO HOOK: List 10 biggest frustrations the MD-5 audience has. Turn each into a bold punchy hook (10 words max). Be direct. Be provocative.
+Framework 3 - 30-SECOND REEL SCRIPT: Pattern-interrupt hook → Short relatable story → Clear CTA to comment or save. Simple sentences. Cut all filler.
+Framework 4 - SOCIAL PROOF: Take Walter’s real results/endorsements and create 5 short on-screen text phrases that spark curiosity and credibility. Max 10 words each.
+Framework 5 - SAVE-WORTHY CONTENT: List 5 practical little-known tips. Each under 12 words. Instantly actionable. Impossible not to save.
+Framework 6 - REPURPOSE MACHINE: Turn any content into: a 7-second Reel script + a 5-slide carousel + a static post with bold statement. Adapt tone and format for each.
+Framework 7 - IRRESISTIBLE CTA: Create 10 short curiosity-driven CTAs that force people to comment or save. No generic phrases. Make them act now.
+
+CAMPAIGN ASSETS TO USE IN CONTENT:
+- Obama letter of support
+- Olympic Gold Medalists Dr. Tommie Smith + Dr. Edwin Moses endorsements
+- Penn Relays champion + Track & Field Hall of Famer
+- Founding President 100 Black Men of PG County
+- WHUR 96.3 FM 2026 Hometown History Maker
+- Governor O’Malley appearance March 2026
+- 75,000+ federal workers in MD-5 constituency
+- NO PAC money - pure people-powered
+
+Always produce content that is: specific (not generic), platform-native, immediately actionable, and makes Walter feel like he is already winning.`,
+   qs:['Apply Framework 1: 5 viral Reel ideas for Walter for June 6 momentum weekend','Apply Framework 2: 10 federal worker frustrations turned into bold hooks','Apply Framework 3: 30-second Reel script — Walter vs the insider machine','Apply Framework 6: Repurpose Walter’s Olympic endorsements into Reel + carousel + static post'],
+   ctaqs:['Call To Action: Full June 6 Forward Together Day of Action content plan','Call To Action: Daily donation pressure content — 1,000 people giving $10 before June 11'],
+   liveqs:['Search: Latest viral Instagram and TikTok political campaign trends June 2026 and apply to Walter','Search: What content from Walter Kirkland and MD-5 candidates is getting the most engagement right now']}
+];
+
+// ═══ STATE ═══
+var USER_NAME='',selAgent=null,pollTimer=null,lastId=0,busy=false;
+
+// ═══ INIT ═══
+window.addEventListener('load',function(){
+  buildNameGrid();buildSidebar();updateCountdown();
+  document.getElementById('sc-login').style.display='flex';
+});
+
+function buildNameGrid(){
+  var g=document.getElementById('namegrid');
+  TEAM.forEach(function(n){
+    var c=document.createElement('button');c.className='nchip';c.textContent=n;
+    c.addEventListener('click',function(){
+      document.querySelectorAll('.nchip').forEach(function(x){x.classList.remove('on');});
+      c.classList.add('on');document.getElementById('username').value=n;
+    });
+    g.appendChild(c);
+  });
+}
+
+// ═══ DRIVE SYNC ═══
+async function syncDrive(){
+  var pill = document.getElementById('syncpill');
+  if(pill){pill.textContent='🔄 Syncing...';pill.style.opacity='0.6';}
+  try {
+    var resp = await fetch(APPS_SCRIPT_URL + '?action=driveContent', {
+      method: 'GET',
+      redirect: 'follow'
+    });
+    var text = await resp.text();
+    var data = JSON.parse(text);
+    if(data.files && data.files.length > 0){
+      var ctx = data.files.map(function(f){
+        return '--- FILE: ' + f.name + ' ---\n' + f.content;
+      }).join('\n\n');
+      DRIVE_CTX = ctx;
+      // Save to Supabase so whole team gets it
+      await fetch(SB_URL+'/rest/v1/campaign_context',{
+        method:'POST',
+        headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},
+        body:JSON.stringify({id:'main',content:ctx,updated_at:new Date().toISOString()})
+      });
+      if(pill){pill.textContent='✅ Drive Synced ('+data.files.length+' files)';pill.style.opacity='1';pill.style.color='var(--green)';}
+      setTimeout(function(){if(pill)pill.textContent='🔄 Sync Drive';pill.style.color='#93c5fd';},3000);
+    } else {
+      if(pill){pill.textContent='📁 No files found';pill.style.opacity='1';}
+      setTimeout(function(){if(pill)pill.textContent='🔄 Sync Drive';},3000);
+    }
+  } catch(e){
+    // Try loading from Supabase cache instead
+    await loadDriveFromSupabase();
+    if(pill){pill.textContent='🔄 Sync Drive';pill.style.opacity='1';}
+  }
+}
+
+async function loadDriveFromSupabase(){
+  try {
+    var r = await fetch(SB_URL+'/rest/v1/campaign_context?id=eq.main',{
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+    });
+    var rows = await r.json();
+    if(Array.isArray(rows) && rows[0] && rows[0].content){
+      DRIVE_CTX = rows[0].content;
+      var pill = document.getElementById('syncpill');
+      if(pill){
+        var age = rows[0].updated_at ? ' ('+new Date(rows[0].updated_at).toLocaleDateString()+')' : '';
+        pill.textContent = '📁 Drive'+age;
+        pill.style.color = 'var(--green)';
+      }
+    }
+  } catch(e){ console.log('No Drive cache:', e); }
+}
+
+function doLogin(){
+  var name=document.getElementById('username').value.trim();
+  var err=document.getElementById('err-login');err.style.display='none';
+  if(!name){err.textContent='Please select or type your name.';err.style.display='block';return;}
+  USER_NAME=name;
+  document.getElementById('upill').textContent='👤 '+name;
+  document.getElementById('sc-login').style.display='none';
+  document.getElementById('app').style.display='flex';
+  updateCountdown();
+  // Load Drive content from cache, then try live sync
+  loadDriveFromSupabase().then(function(){syncDrive();});
+}
+
+function doLogout(){
+  if(pollTimer){clearInterval(pollTimer);pollTimer=null;}
+  selAgent=null;lastId=0;
+  document.getElementById('app').style.display='none';
+  document.getElementById('sc-login').style.display='flex';
+}
+
+function updateCountdown(){
+  var evd=Math.ceil((new Date('2026-06-11')-new Date())/86400000);
+  var prd=Math.ceil((new Date('2026-06-23')-new Date())/86400000);
+  var ep=document.getElementById('evpill');var pp=document.getElementById('prpill');if(!ep||!pp)return;
+  if(evd>0){ep.textContent=evd+'d to early voting';pp.textContent=prd+'d to primary';}
+  else if(prd>0){ep.textContent='🔴 Early voting OPEN';ep.className='pill pill-ev';pp.textContent=prd+'d to primary';}
+  else{pp.textContent='🗳️ Primary Day!';}
+}
+
+function buildSidebar(){
+  var al=document.getElementById('agentlist');
+  AGENTS.forEach(function(a){
+    var b=document.createElement('button');b.className='ab';b.id='ab-'+a.id;
+    b.innerHTML='<div class="aic" style="background:'+a.bg+'">'+a.ico+'</div><div style="flex:1;min-width:0"><div class="an">'+a.name+'</div><div class="abd" style="color:'+a.tc+'">'+a.badge+'</div></div>';
+    b.addEventListener('click',function(){pickAgent(a);});
+    al.appendChild(b);
+  });
+}
+
+function pickAgent(a){
+  // Always close studio and restore body when agent is selected
+  var sp=document.getElementById('studio-panel');
+  var bd=document.getElementById('body');
+  if(sp) sp.style.display='none';
+  if(bd) bd.style.display='flex';
+  var abc=document.getElementById('ab-create');
+  if(abc){abc.style.borderColor='var(--gold-br)';abc.style.background='rgba(201,168,53,0.08)';}
+  selAgent=a;lastId=0;
+  document.querySelectorAll('.ab').forEach(function(x){x.classList.remove('on');});
+  document.getElementById('ab-'+a.id).classList.add('on');
+  document.getElementById('pt').innerHTML='<span>'+a.ico+'</span><span style="color:'+a.col+'"> '+a.name+'</span>';
+  document.getElementById('pd').textContent=a.desc;
+  document.getElementById('infobar').style.display='block';
+  document.getElementById('infobar').innerHTML='<strong style="color:var(--white)">White</strong> = expert analysis &nbsp;|&nbsp; <strong style="color:var(--gold-l)">⚡ Gold</strong> = instant Call To Action &nbsp;|&nbsp; <strong style="color:#93c5fd">🔍 Blue</strong> = searches internet for latest news &nbsp;|&nbsp; <span class="livedot"></span>Synced live with team';
+  document.getElementById('qarea').style.display='block';
+
+  var qg=document.getElementById('qgrid');qg.innerHTML='';
+  a.qs.forEach(function(q){
+    var btn=document.createElement('button');btn.className='qb';btn.textContent=q;
+    btn.addEventListener('click',function(){fireQ(a,q,false,false);});qg.appendChild(btn);
+  });
+
+  var cg=document.getElementById('ctagrid');cg.innerHTML='';
+  a.ctaqs.forEach(function(q){
+    var btn=document.createElement('button');btn.className='qb cta';btn.innerHTML='⚡ '+q;
+    btn.addEventListener('click',function(){fireQ(a,q,true,false);});cg.appendChild(btn);
+  });
+
+  var lg=document.getElementById('livegrid');lg.innerHTML='';
+  a.liveqs.forEach(function(q){
+    var btn=document.createElement('button');btn.className='qb live';
+    btn.innerHTML='🔍 '+q.replace('Search: ','');
+    btn.addEventListener('click',function(){fireQ(a,q,false,true);});lg.appendChild(btn);
+  });
+
+  document.getElementById('inp').disabled=false;
+  document.getElementById('inp').placeholder='Add your prompt here... (prefix search: for live research)';
+  document.getElementById('sbtn').disabled=false;
+
+
+  if(pollTimer){clearInterval(pollTimer);pollTimer=null;}
+  loadMsgs(a.id,true);
+  pollTimer=setInterval(function(){if(selAgent&&selAgent.id===a.id)loadMsgs(a.id,false);},3000);
+}
+
+function fireQ(a,q,isCta,isLive){
+  var display=isCta?'⚡ '+q:isLive?'🔍 '+q.replace('Search: ',''):q;
+  var content=q;
+  if(isLive)content=LIVE_PREFIX+q+CTA_RULES;
+  else if(isCta)content='[CTA] '+q;
+  saveMsg(a.id,{role:'user',content:content,display:display,who:USER_NAME,isLive:isLive}).then(function(){
+    callAPI(a,content,a.sys+(isLive?'':CTA_RULES),isLive);
+  });
+}
+
+function sendMsg(){
+  if(!selAgent||busy)return;
+  var inp=document.getElementById('inp');var txt=inp.value.trim();if(!txt)return;inp.value='';
+  var isLive=txt.toLowerCase().startsWith('search:');
+  var content=isLive?LIVE_PREFIX+txt+CTA_RULES:txt;
+  var display=txt;
+  saveMsg(selAgent.id,{role:'user',content:content,display:display,who:USER_NAME,isLive:isLive}).then(function(){
+    callAPI(selAgent,content,selAgent.sys+(isLive?'':CTA_RULES),isLive);
+  });
+}
+
+// ═══ SUPABASE ═══
+function loadMsgs(agentId,full){
+  var url=SB_URL+'/rest/v1/messages?agent_id=eq.'+encodeURIComponent(agentId)+'&order=ts.asc';
+  if(!full&&lastId>0)url+='&id=gt.'+lastId;
+  fetch(url,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}})
+  .then(function(r){return r.json();})
+  .then(function(rows){
+    if(!Array.isArray(rows)||!rows.length){if(full)renderChat([]);return;}
+    if(!selAgent||selAgent.id!==agentId)return;
+    if(full)renderChat(rows);else appendMsgs(rows);
+    lastId=rows[rows.length-1].id;
+  }).catch(function(){if(full)renderChat([]);});
+}
+
+function saveMsg(agentId,msg){
+  return fetch(SB_URL+'/rest/v1/messages',{
+    method:'POST',
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'},
+    body:JSON.stringify({agent_id:agentId,role:msg.role,content:msg.content,display:msg.display||msg.content,who:msg.who||USER_NAME,ts:Date.now()})
+  }).then(function(r){return r.json();}).then(function(rows){return Array.isArray(rows)&&rows[0]?rows[0].id:null;});
+}
+
+// ═══ ANTHROPIC API ═══
+async function callAPI(a,userText,sysPrompt,isLive){
+  if(busy)return;busy=true;document.getElementById('sbtn').disabled=true;
+  var box=document.getElementById('chatarea');
+  var ti=document.createElement('div');
+  ti.className='typing'+(isLive?' live-typing':'');ti.id='typing-ind';
+  ti.innerHTML='<div class="td"></div><div class="td"></div><div class="td"></div>';
+  if(isLive){
+    var searchLabel=document.createElement('span');
+    searchLabel.style.cssText='font-size:10px;color:#93c5fd;margin-left:8px;font-family:DM Mono,monospace';
+    searchLabel.textContent='🔍 searching web...';
+    ti.appendChild(searchLabel);
+  }
+  box.appendChild(ti);box.scrollTop=box.scrollHeight;
+
+  var history=[];
+  try{
+    var r=await fetch(SB_URL+'/rest/v1/messages?agent_id=eq.'+encodeURIComponent(a.id)+'&order=ts.asc&limit=20',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+    var rows=await r.json();
+    if(Array.isArray(rows))rows.forEach(function(row){history.push({role:row.role,content:row.content});});
+  }catch(e){history=[{role:'user',content:userText}];}
+
+  var replyText='';
+  try{
+    // Inject latest Drive content into system prompt
+    var fullSysPrompt = sysPrompt + (DRIVE_CTX ? '\n\nLATEST CAMPAIGN MATERIALS FROM DRIVE:\n' + DRIVE_CTX : '');
+    var resp=await fetch(PROXY_URL,{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':'Bearer '+SB_KEY
+      },
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:isLive?3000:2000,
+        system:sysPrompt,
+        messages:history.length?history:[{role:'user',content:userText}],
+        useSearch:isLive
+      })
+    });
+    var rawText=await resp.text();
+    var data=JSON.parse(rawText);
+    if(data.error){replyText='❌ '+(data.error.message||'API error.');}
+    else{
+      // Handle both regular text and web search tool use responses
+      var text='';
+      if(data._text){text=data._text;}
+      else if(data.content&&Array.isArray(data.content)){
+        text=data.content.filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('\n');
+      }
+      replyText=text||'No response — please try again.';
+    }
+  }catch(e){replyText='❌ Error: '+e.message;}
+
+  await saveMsg(a.id,{role:'assistant',content:replyText,display:replyText,who:(isLive?'🔍 ':'🤖 ')+a.name,isLive:isLive});
+  var tEl=document.getElementById('typing-ind');if(tEl)tEl.remove();
+  busy=false;document.getElementById('sbtn').disabled=false;
+  if(selAgent&&selAgent.id===a.id)loadMsgs(a.id,true);
+}
+
+// ═══ RENDER ═══
+function renderChat(msgs){
+  var box=document.getElementById('chatarea');
+  if(!msgs||!msgs.length){
+    box.innerHTML='<div class="estate"><div class="eico">'+(selAgent?selAgent.ico:'✊')+'</div><div class="etitle">'+( selAgent?selAgent.name+' ready':'Let\'s Rise Up.')+'</div><div class="esub">'+(selAgent?selAgent.desc+'. Click a question above or type below.':'Select an agent to begin.')+'</div></div>';
+    return;
+  }
+  box.innerHTML=msgs.map(buildMsgHTML).join('');
+  box.scrollTop=box.scrollHeight;
+}
+
+function appendMsgs(newMsgs){
+  var box=document.getElementById('chatarea');
+  var estate=box.querySelector('.estate');if(estate)box.innerHTML='';
+  var ti=document.getElementById('typing-ind');
+  newMsgs.forEach(function(m){
+    var div=document.createElement('div');div.innerHTML=buildMsgHTML(m);
+    if(ti)box.insertBefore(div.firstChild,ti);else box.appendChild(div.firstChild);
+  });
+  box.scrollTop=box.scrollHeight;
+  if(newMsgs.length)lastId=newMsgs[newMsgs.length-1].id;
+}
+
+function buildMsgHTML(m){
+  var isUser=m.role==='user';
+  var displayText=(m.display||m.content||'').replace('[CTA] ','');
+  var who=m.who||'Team';
+  var ts=m.ts?new Date(m.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
+  var isMe=who===USER_NAME;
+  var isLive=who&&who.startsWith('🔍');
+
+  if(isUser){
+    return '<div class="mwrap"><div class="mwho'+(isMe?' r':'')+'">'+esc(who)+(isMe?'<span class="mbadge">you</span>':'')+'</div>'
+      +'<div class="msg-u" style="align-self:'+(isMe?'flex-end':'flex-start')+'">'+esc(displayText)+'</div>'
+      +'<div class="mts'+(isMe?' r':'')+'">'+ts+'</div></div>';
+  }
+
+  var parts=(m.content||'').split(/##\s*Call To Action/i);
+  var main=esc(parts[0].trim());
+  var ctaHtml=parts[1]?'<div class="cta-block"><div class="cta-hd">⚡ Call To Action</div>'+esc(parts[1].trim())+'</div>':'';
+  var liveClass=isLive?' live-msg':'';
+
+  return '<div class="mwrap"><div class="mwho">'+esc(who)+(isLive?'<span class="mlive">live research</span>':'')+'</div>'
+    +'<div class="msg-a'+liveClass+'">'+main+ctaHtml+'</div>'
+    +'<div class="mts">'+ts+'</div></div>';
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
+
+document.getElementById('inp').addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}
+});
+
+
+
+// ════════════════════════
+// CONTENT STUDIO
+// ════════════════════════
+var sPlat='Instagram', sFmt='post', sTopic='', sScenes=[], sReelIdx=0, sReelTimer=null;
+
+function openStudio(){
+  document.getElementById('body').style.display='none';
+  document.getElementById('studio-panel').style.display='flex';
+  document.querySelectorAll('.ab').forEach(function(x){x.classList.remove('on');});
+  var asc=document.getElementById('ab-create');
+  if(asc){asc.style.borderColor='var(--gold)';asc.style.background='rgba(201,168,53,0.15)';}
+}
+
+function closeStudio(){
+  document.getElementById('studio-panel').style.display='none';
+  document.getElementById('body').style.display='flex';
+  var asc2=document.getElementById('ab-create');
+  if(asc2){asc2.style.borderColor='var(--gold-br)';asc2.style.background='rgba(201,168,53,0.08)';}
+}
+
+function sPick(btn, group){
+  var containerId = group==='plat'?'s-plats':'s-fmts';
+  document.querySelectorAll('#'+containerId+' .plchip,#'+containerId+' .fmtcard').forEach(function(b){b.classList.remove('on');});
+  btn.classList.add('on');
+  if(group==='plat') sPlat=btn.dataset.v;
+  else sFmt=btn.dataset.v;
+}
+
+function sTopic(btn){
+  document.querySelectorAll('#s-topics .topchip').forEach(function(b){b.classList.remove('on');});
+  btn.classList.add('on');
+  document.getElementById('s-topic-input').value=btn.dataset.v;
+  sTopic_val=btn.dataset.v;
+}
+
+async function sGenerate(){
+  var topicInput = document.getElementById('s-topic-input').value.trim();
+  if(!topicInput){
+    document.getElementById('s-status').textContent='⚠️ Please select or type a topic first';
+    return;
+  }
+  var btn=document.getElementById('s-genbtn');
+  var status=document.getElementById('s-status');
+  var preview=document.getElementById('s-preview-area');
+  btn.disabled=true;
+  preview.innerHTML='<div style="text-align:center;padding:40px;color:var(--tx2)"><div class="scene-spin" style="margin:0 auto 12px"></div><div>Claude is writing your content...</div></div>';
+  status.textContent='';
+
+  // Build system prompt based on format
+  var sys = 'You are a social media content creator for Walter Kirkland for Congress MD-5 2026. Slogan: Let\u2019s Rise Up. Together. Authentic outsider, no PAC money, Penn Relays champion, 100 Black Men founder, Obama letter endorsement, Olympic Gold Medalists Tommie Smith and Edwin Moses endorsements.';
+
+  var isReel = sFmt==='reel';
+  var isStory = sFmt==='story';
+  var imgSize = isReel||isStory ? '1024x1792' : '1024x1024';
+
+  if(isReel){
+    sys += ' Create a 5-slide '+sPlat+' reel using PAS copywriting (Hook-Problem-Proof-Solution-CTA) and 5-step narrative arc. Walter Kirkland for Congress MD-5 2026. Each slide is a standalone downloadable image with text baked in by ChatGPT Images 2.0. RESPOND EXACTLY in this format with no extra text, one item per line: SLIDE_1_HEADLINE: [3-6 POWERFUL WORDS - appears large on image] | SLIDE_1_SUBTEXT: [10-15 words supporting text] | SLIDE_1_VISUAL: [photorealistic background scene, no faces, specific colors and mood] | SLIDE_1_BADGE: [6-8 words for bottom bar] | SLIDE_2_HEADLINE: [...] | SLIDE_2_SUBTEXT: [...] | SLIDE_2_VISUAL: [...] | SLIDE_2_BADGE: [...] | SLIDE_3_HEADLINE: [...] | SLIDE_3_SUBTEXT: [...] | SLIDE_3_VISUAL: [...] | SLIDE_3_BADGE: [...] | SLIDE_4_HEADLINE: [...] | SLIDE_4_SUBTEXT: [...] | SLIDE_4_VISUAL: [...] | SLIDE_4_BADGE: [...] | SLIDE_5_HEADLINE: [...] | SLIDE_5_SUBTEXT: [...] | SLIDE_5_VISUAL: [...] | SLIDE_5_BADGE: [...] | CAPTION: [full platform caption using AIDA] | HASHTAGS: [15 hashtags]';
+  } else {
+    sys += ' Write a '+sPlat+' '+sFmt+' for '+sPlat+'. Include: CAPTION: [full caption] HASHTAGS: [10 hashtags] IMAGE_PROMPT: [AI image description, symbolic campaign imagery, no real faces, navy blue red gold colours, photorealistic]';
+  }
+
+  // ── Step 1: Get copy from Claude ──
+  try {
+    var r = await fetch(PROXY_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,system:sys,messages:[{role:'user',content:'Create content about: '+topicInput}]})
+    });
+    var raw = await r.text();
+    var d = JSON.parse(raw);
+    var copy = d._text || (d.content||[]).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('\n');
+    if(!copy){status.textContent='❌ Copy generation failed';btn.disabled=false;return;}
+
+    if(isReel){
+      await sShowReel(copy, imgSize, status, preview, btn);
+    } else {
+      await sShowPost(copy, imgSize, status, preview, btn, isStory);
+    }
+  } catch(e){
+    status.textContent='❌ '+e.message;
+    preview.innerHTML='<div style="padding:40px;text-align:center;color:#f09090">Error: '+e.message+'</div>';
+    btn.disabled=false;
+  }
+}
+
+async function sShowPost(copy, imgSize, status, preview, btn, isStory){
+  var capMatch = copy.match(/CAPTION:\s*([\s\S]*?)(?=HASHTAGS:|IMAGE_PROMPT:|$)/i);
+  var tagMatch = copy.match(/HASHTAGS:\s*([\s\S]*?)(?=IMAGE_PROMPT:|$)/i);
+  var imgMatch = copy.match(/IMAGE_PROMPT:\s*([\s\S]*?)$/i);
+
+  var caption = (capMatch?capMatch[1].trim():copy).substring(0,800);
+  var hashtags = tagMatch?tagMatch[1].trim():'';
+  var imgPrompt = imgMatch?imgMatch[1].trim():'Maryland congressional campaign 2026, community gathering, American flag, inspirational, navy blue and red colours, photorealistic';
+  imgPrompt += ' — no recognisable faces, campaign poster style';
+
+  var fullText = caption + (hashtags?'\n\n'+hashtags:'');
+
+  // Show layout with loading image
+  var wrapClass = isStory?'post-img-wrap story':'post-img-wrap';
+  var capClass = isStory?'post-caption story':'post-caption';
+
+  preview.innerHTML =
+    '<div class="post-preview" style="width:100%">' +
+    '<div class="'+wrapClass+'" id="s-img-wrap"><div class="scene-loading"><div class="scene-spin"></div><div style="font-size:12px;color:var(--tx2)">ChatGPT Images 2.0 generating...</div></div></div>' +
+    '<div class="'+capClass+'">'+esc(fullText)+'</div>' +
+    '<div class="dl-row" id="s-dl-row">' +
+    '<button class="dlbtn dlbtn-txt" onclick="sCopy()">📋 Copy Caption</button>' +
+    '</div></div>';
+
+  // ── Step 2: Generate image ──
+  status.textContent = '🎨 ChatGPT Images 2.0 generating...';
+  try {
+    var ir = await fetch(PROXY_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY},
+      body:JSON.stringify({action:'generateImage',prompt:imgPrompt,size:imgSize,quality:'medium'})
+    });
+    var id = JSON.parse(await ir.text());
+    if(id.data && id.data[0] && id.data[0].b64_json){
+      var src = 'data:image/png;base64,'+id.data[0].b64_json;
+      document.getElementById('s-img-wrap').innerHTML = '<img class="post-img" src="'+src+'" alt="Campaign post"/>';
+      var bestT = getBestTime(sPlat);
+      document.getElementById('s-dl-row').innerHTML =
+        '<button class="dlbtn dlbtn-img" onclick="sDownloadImg(window._sLastImg,\'walter-campaign.png\')">⬇️ Download</button>' +
+        '<button class="dlbtn dlbtn-txt" onclick="sCopy()">📋 Copy Caption</button>' +
+        '<button class="dlbtn" style="background:var(--green);color:#fff" onclick="sPostNow()">🚀 Post Now</button>' +
+        '<button class="dlbtn" style="background:var(--blue);color:#fff" onclick="sSchedule()">🕐 Schedule: ' + bestT.label + '</button>';
+      window._sLastImg = src;
+      status.textContent = '✅ Done! Download your post below.';
+    } else {
+      var errMsg = id.error?id.error.message:'No image returned';
+      document.getElementById('s-img-wrap').innerHTML = '<div style="padding:20px;text-align:center;color:#f09090;font-size:12px">Image failed: '+errMsg+'<br><br>Add OPENAI_KEY to Supabase secrets to enable images</div>';
+      status.textContent = '⚠️ Image failed — copy is ready';
+    }
+  } catch(e){
+    document.getElementById('s-img-wrap').innerHTML = '<div style="padding:20px;text-align:center;color:#f09090;font-size:12px">Image error: '+e.message+'</div>';
+    status.textContent='⚠️ Image error — add OPENAI_KEY to Supabase secrets';
+  }
+  window._sLastCaption = fullText;
+  btn.disabled=false;
+}
+
+function sDownloadImg(src, name){var a=document.createElement('a');a.href=src;a.download=name||'walter-campaign.png';a.click();}
+function sCopy(){
+  var txt=window._sLastCaption||'';
+  if(!txt)return;
+  navigator.clipboard.writeText(txt).catch(function(){
+    var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+  });
+  var s=document.getElementById('s-status');if(s){s.textContent='✅ Copied!';setTimeout(function(){s.textContent='';},2000);}
+}
+function sDownloadTxt(){
+  var txt=window._sLastCaption||'';
+  var b=new Blob([txt],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='caption.txt';a.click();
+}
+
+
+// ════════════════════════════════════
+// SETTINGS
+// ════════════════════════════════════
+var CREDS = {};
+
+function openSettings(){
+  loadSettingsFn();
+  document.getElementById('settings-modal').style.display='flex';
+}
+function closeSettings(){
+  document.getElementById('settings-modal').style.display='none';
+}
+
+async function loadSettingsFn(){
+  try {
+    var r = await fetch(SB_URL+'/rest/v1/platform_settings?id=eq.main',{
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+    });
+    var rows = await r.json();
+    if(Array.isArray(rows) && rows[0] && rows[0].credentials){
+      CREDS = JSON.parse(rows[0].credentials);
+      if(CREDS.fbPageId) document.getElementById('fb-page-id').value = CREDS.fbPageId;
+      if(CREDS.fbToken) document.getElementById('fb-token').value = CREDS.fbToken;
+      if(CREDS.igAccountId) document.getElementById('ig-account-id').value = CREDS.igAccountId;
+      updateCredBadges();
+    }
+  } catch(e){ console.log('No settings yet'); }
+}
+
+function updateCredBadges(){
+  var fbBadge = document.getElementById('fb-status');
+  var igBadge = document.getElementById('ig-status');
+  if(fbBadge) fbBadge.textContent = CREDS.fbPageId ? 'Connected' : 'Not set';
+  if(fbBadge) fbBadge.style.color = CREDS.fbPageId ? 'var(--green)' : 'var(--tx3)';
+  if(igBadge) igBadge.textContent = CREDS.igAccountId ? 'Connected' : 'Not set';
+  if(igBadge) igBadge.style.color = CREDS.igAccountId ? 'var(--green)' : 'var(--tx3)';
+}
+
+async function saveSettingsFn(){
+  CREDS.fbPageId = document.getElementById('fb-page-id').value.trim();
+  CREDS.fbToken = document.getElementById('fb-token').value.trim();
+  CREDS.igAccountId = document.getElementById('ig-account-id').value.trim();
+  var status = document.getElementById('settings-status');
+  try {
+    await fetch(SB_URL+'/rest/v1/platform_settings',{
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},
+      body:JSON.stringify({id:'main',credentials:JSON.stringify(CREDS),updated_at:new Date().toISOString()})
+    });
+    status.textContent = '✅ Settings saved!';
+    updateCredBadges();
+    setTimeout(function(){status.textContent='';},2500);
+  } catch(e){
+    status.textContent = 'Error saving: '+e.message;
+  }
+}
+
+// ════════════════════════════════════
+// BEST TIME ENGINE (MD-5 campaign)
+// Audience: Federal workers, Black voters PGC, DC commuters, seniors
+// Timezone: EST (UTC-5)
+// ════════════════════════════════════
+function getBestTime(platform){
+  var now = new Date();
+  var est = new Date(now.toLocaleString('en-US',{timeZone:'America/New_York'}));
+  var day = est.getDay(); // 0=Sun,1=Mon...6=Sat
+  var hour = est.getHours();
+
+  // Best windows per platform for Walter's MD-5 audience
+  var windows = {
+    'Facebook':   [{days:[2,3,4],hours:[9,10,19,20],'why':'Federal workers & seniors check FB during work breaks and evenings'}],
+    'Instagram':  [{days:[1,2,3,4,5],hours:[7,8,12],'why':'Commuters & lunch scrollers — DC metro crowd'}],
+    'TikTok':     [{days:[1,2,3,4,5,6],hours:[19,20,21],'why':'Younger MD-5 voters in the evening'}],
+    'Twitter/X':  [{days:[1,2,3,4,5],hours:[7,8,9,17,18],'why':'Political Twitter is most active during morning commute'}],
+    'LinkedIn':   [{days:[2,3,4],hours:[10,11,12],'why':'Federal workers & professionals on lunch break'}]
+  };
+
+  var plat = windows[platform] || windows['Facebook'];
+  var target = plat[0];
+
+  // Find next occurrence of a best window
+  for(var dOffset = 0; dOffset < 8; dOffset++){
+    var checkDay = (day + dOffset) % 7;
+    if(target.days.indexOf(checkDay) === -1) continue;
+    var checkHours = target.hours;
+    for(var i = 0; i < checkHours.length; i++){
+      var h = checkHours[i];
+      if(dOffset === 0 && h <= hour) continue; // already past today
+      var target_date = new Date(est);
+      target_date.setDate(est.getDate() + dOffset);
+      target_date.setHours(h, 0, 0, 0);
+      var diff = Math.round((target_date - est) / 60000);
+      var label = '';
+      if(dOffset === 0) label = 'Today ' + formatHour(h);
+      else if(dOffset === 1) label = 'Tomorrow ' + formatHour(h);
+      else {
+        var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        label = days[checkDay] + ' ' + formatHour(h);
+      }
+      return {date: target_date, label: label, why: target.why, diffMins: diff};
+    }
+  }
+  // Fallback: 7pm today
+  var fb = new Date(est);
+  fb.setHours(19,0,0,0);
+  return {date: fb, label: 'Today 7:00 PM', why: 'Peak engagement time'};
+}
+
+function formatHour(h){
+  if(h === 0) return '12:00 AM';
+  if(h < 12) return h + ':00 AM';
+  if(h === 12) return '12:00 PM';
+  return (h-12) + ':00 PM';
+}
+
+// ════════════════════════════════════
+// POST NOW
+// ════════════════════════════════════
+async function sPostNow(){
+  var caption = window._sLastCaption || '';
+  var imgSrc = window._sLastImg || null;
+
+  if(!caption){ alert('No content to post yet. Generate first.'); return; }
+
+  var canFB = CREDS.fbPageId && CREDS.fbToken;
+  var canIG = CREDS.igAccountId && CREDS.fbToken;
+
+  if(!canFB && !canIG){
+    alert('Add your Facebook credentials in Settings (⚙️) to enable auto-posting.');
+    return;
+  }
+
+  var status = document.getElementById('s-status');
+  status.textContent = 'Posting...';
+
+  var imageUrl = null;
+  if(imgSrc){
+    // Upload image to Supabase Storage first to get a public URL
+    status.textContent = 'Uploading image...';
+    try {
+      var uploadR = await fetch(PROXY_URL,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY},
+        body:JSON.stringify({action:'uploadImage',base64:imgSrc,sbKey:SB_KEY})
+      });
+      var uploadD = JSON.parse(await uploadR.text());
+      if(uploadD.url) imageUrl = uploadD.url;
+    } catch(e){ console.log('Image upload failed, posting text only'); }
+  }
+
+  // Post to enabled platforms
+  var posted = [];
+  var failed = [];
+
+  if(sPlat === 'Facebook' && canFB){
+    status.textContent = 'Posting to Facebook...';
+    try {
+      var r = await fetch(PROXY_URL,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY},
+        body:JSON.stringify({action:'postFacebook',pageId:CREDS.fbPageId,pageToken:CREDS.fbToken,message:caption,imageUrl:imageUrl})
+      });
+      var d = JSON.parse(await r.text());
+      if(d.id) posted.push('Facebook');
+      else failed.push('Facebook: '+(d.error?d.error.message:'Unknown error'));
+    } catch(e){ failed.push('Facebook: '+e.message); }
+  }
+
+  if(sPlat === 'Instagram' && canIG && imageUrl){
+    status.textContent = 'Posting to Instagram...';
+    try {
+      var r2 = await fetch(PROXY_URL,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY},
+        body:JSON.stringify({action:'postInstagram',igAccountId:CREDS.igAccountId,fbToken:CREDS.fbToken,caption:caption,imageUrl:imageUrl})
+      });
+      var d2 = JSON.parse(await r2.text());
+      if(d2.id) posted.push('Instagram');
+      else failed.push('Instagram: '+(d2.error?d2.error.message:'Unknown error'));
+    } catch(e){ failed.push('Instagram: '+e.message); }
+  }
+
+  if(posted.length > 0) status.textContent = '✅ Posted to: ' + posted.join(', ');
+  else if(failed.length > 0) status.textContent = '❌ Failed: ' + failed.join(' | ');
+  else status.textContent = 'ℹ️ Add credentials in Settings to auto-post to ' + sPlat;
+}
+
+// ════════════════════════════════════
+// SCHEDULE POST
+// ════════════════════════════════════
+async function sSchedule(){
+  var caption = window._sLastCaption || '';
+  var imgSrc = window._sLastImg || null;
+  if(!caption){ alert('Generate content first.'); return; }
+
+  var best = getBestTime(sPlat);
+  var status = document.getElementById('s-status');
+
+  try {
+    var r = await fetch(PROXY_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY},
+      body:JSON.stringify({
+        action:'saveScheduled',
+        sbKey:SB_KEY,
+        platform:sPlat,
+        caption:caption,
+        image_b64:imgSrc,
+        scheduled_at:best.date.toISOString(),
+        pageId:CREDS.fbPageId||''
+      })
+    });
+    var d = JSON.parse(await r.text());
+    if(Array.isArray(d) && d[0]){
+      status.textContent = '✅ Scheduled for ' + best.label + ' (' + best.why + ')';
+    } else {
+      status.textContent = '✅ Scheduled for ' + best.label + ' — open app at that time to auto-post';
+    }
+  } catch(e){
+    status.textContent = '✅ Best time: ' + best.label + ' — ' + best.why;
+  }
+}
+
+// Load settings on startup
+window.addEventListener('load', function(){
+  setTimeout(loadSettingsFn, 1000);
+});
+
+
+// ════════════════════════════════════════════════════
+// REAL REEL GENERATOR
+// Skills used:
+//   copywriting: PAS framework (Hook→Problem→Proof→Solution→CTA)
+//   email-sequence: narrative arc across 5 slides
+//   ad-copy: stop-the-scroll hooks, platform native format
+//   frontend-design: presidential visual identity
+//   ChatGPT Images 2.0: text-in-image rendering (gpt-image-2 strength)
+// ════════════════════════════════════════════════════
+async function sShowReel(copy, imgSize, status, preview, btn){
+  // Parse 5 slides from pipe-delimited script
+  var slides = [];
+  for(var i=1; i<=5; i++){
+    var hM = copy.match(new RegExp('SLIDE_'+i+'_HEADLINE:\\s*([^|\\n]+)','i'));
+    var sM = copy.match(new RegExp('SLIDE_'+i+'_SUBTEXT:\\s*([^|\\n]+)','i'));
+    var vM = copy.match(new RegExp('SLIDE_'+i+'_VISUAL:\\s*([^|\\n]+)','i'));
+    var bM = copy.match(new RegExp('SLIDE_'+i+'_BADGE:\\s*([^|\\n]+)','i'));
+    if(hM){
+      slides.push({
+        headline: hM[1].trim(),
+        subtext: sM ? sM[1].trim() : '',
+        visual: vM ? vM[1].trim() : 'Campaign imagery Maryland 2026',
+        badge: bM ? bM[1].trim() : 'Vote Walter Kirkland June 23'
+      });
+    }
+  }
+  var capM = copy.match(/CAPTION:\s*([\s\S]*?)(?=HASHTAGS:|$)/i);
+  var tagM = copy.match(/HASHTAGS:\s*([\s\S]*?)$/i);
+  window._sLastCaption = (capM ? capM[1].trim()+'\n\n' : '') + (tagM ? tagM[1].trim() : '');
+
+  if(!slides.length){ status.textContent='Could not parse reel script. Try again.'; btn.disabled=false; return; }
+
+  // Build grid layout - all slides visible at once, downloadable individually
+  var gridHtml = '<div style="width:100%">' +
+    '<div style="font-size:12px;color:var(--tx2);margin-bottom:14px;font-family:DM Mono,monospace;letter-spacing:1px;text-transform:uppercase">' +
+    '✊ Walter Kirkland · ' + sPlat + ' Reel · ' + slides.length + ' slides · Download each image</div>' +
+    '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:16px" id="reel-grid"></div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+    '<button onclick="sDownloadAllSlides()" style="padding:9px 18px;border-radius:8px;background:var(--green);border:none;color:#fff;cursor:pointer;font-family:DM Sans,sans-serif;font-size:13px;font-weight:600">⬇️ Download All Slides</button>' +
+    '<button onclick="sCopy()" style="padding:9px 18px;border-radius:8px;background:var(--navy3);border:1px solid var(--navy4);color:var(--tx);cursor:pointer;font-family:DM Sans,sans-serif;font-size:13px">📋 Copy Caption</button>' +
+    '</div>' +
+    (window._sLastCaption ? '<div style="margin-top:12px;background:var(--navy2);border:1px solid var(--navy4);border-radius:8px;padding:12px;font-size:12px;color:var(--tx);white-space:pre-wrap;max-height:140px;overflow-y:auto">'+esc(window._sLastCaption)+'</div>' : '') +
+    '</div>';
+  preview.innerHTML = gridHtml;
+
+  // Generate each slide with ChatGPT Images 2.0 - text baked INTO the image
+  window._sReelSlides = [];
+  for(var j=0; j<slides.length; j++){
+    var sl = slides[j];
+    status.textContent = 'Generating slide ' + (j+1) + ' of ' + slides.length + ' with ChatGPT Images 2.0...';
+
+    // Add loading placeholder
+    var grid = document.getElementById('reel-grid');
+    if(grid){
+      var placeholder = document.createElement('div');
+      placeholder.id = 'slide-card-'+j;
+      placeholder.style.cssText = 'background:var(--navy3);border:1px solid var(--navy4);border-radius:10px;overflow:hidden;aspect-ratio:9/16;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px';
+      placeholder.innerHTML = '<div style="width:24px;height:24px;border:2px solid var(--navy4);border-top-color:var(--gold);border-radius:50%;animation:sspin 0.8s linear infinite"></div><div style="font-size:10px;color:var(--tx3);font-family:DM Mono,monospace">Slide '+(j+1)+'</div>';
+      grid.appendChild(placeholder);
+    }
+
+    // Craft the image prompt so gpt-image-2 renders text IN the image
+    var slideNum = ['HOOK','CONTEXT','PROOF','VISION','CTA'][j] || ('SLIDE '+(j+1));
+    var imagePrompt = 'Professional political campaign social media reel slide. ' +
+      'Exact 9:16 vertical portrait format (tall and narrow, like a phone screen). ' +
+      'DESIGN SPEC: Deep navy blue background (#0a1628) with subtle texture. ' +
+      'Red accent bar across very top (10px). ' +
+      'SLIDE LABEL: Small text "' + slideNum + '" in upper left, gold color, uppercase. ' +
+      'MAIN HEADLINE: Large bold white text, Oswald-style condensed font, positioned in upper third: "' + sl.headline.toUpperCase() + '" ' +
+      'SUPPORTING TEXT: Medium white text below headline: "' + sl.subtext + '" ' +
+      'VISUAL BACKGROUND: ' + sl.visual + ' (as a photorealistic background image that shows through a dark overlay) ' +
+      'BOTTOM BADGE: Red rectangle bar at very bottom with white text: "' + sl.badge.toUpperCase() + '" ' +
+      'BOTTOM LINE: Smaller text below badge: "VOTE JUNE 23 · walterkirklandforcongress.com" ' +
+      'STYLE: Presidential, powerful, professional US congressional campaign 2026. ' +
+      'No real recognisable faces. Render all text legibly and exactly as specified. ' +
+      'Navy/red/gold campaign colour palette throughout.';
+
+    try {
+      var ir = await fetch(PROXY_URL, {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY},
+        body:JSON.stringify({action:'generateImage', prompt:imagePrompt, size:'1024x1792', quality:'high'})
+      });
+      var id = JSON.parse(await ir.text());
+      if(id.data && id.data[0] && id.data[0].b64_json){
+        var src = 'data:image/png;base64,'+id.data[0].b64_json;
+        window._sReelSlides[j] = src;
+        var card = document.getElementById('slide-card-'+j);
+        if(card){
+          card.innerHTML = '<img src="'+src+'" style="width:100%;height:100%;object-fit:cover;display:block"/>' +
+            '<div style="padding:8px;background:var(--navy3);border-top:1px solid var(--navy4)">' +
+            '<div style="font-size:10px;color:var(--gold);font-family:DM Mono,monospace;letter-spacing:1px;margin-bottom:4px">'+slideNum+'</div>' +
+            '<div style="font-size:11px;color:var(--tx);font-weight:600;line-height:1.3">'+esc(sl.headline)+'</div>' +
+            '<button onclick="sDownloadSlide('+j+',\'reel-slide-'+j+'.png\')" style="margin-top:6px;width:100%;padding:5px;border-radius:5px;background:var(--green);border:none;color:#fff;font-size:11px;cursor:pointer;font-family:DM Sans,sans-serif">⬇️ Download</button>' +
+            '</div>';
+        }
+      } else {
+        var errCard = document.getElementById('slide-card-'+j);
+        var errMsg = id.error ? id.error.message : 'Image generation failed';
+        if(errCard) errCard.innerHTML = '<div style="padding:12px;font-size:11px;color:#f09090;text-align:center;line-height:1.5">'+esc(errMsg)+'</div>';
+      }
+    } catch(e){
+      var errCard2 = document.getElementById('slide-card-'+j);
+      if(errCard2) errCard2.innerHTML = '<div style="padding:12px;font-size:11px;color:#f09090;text-align:center">Error: '+esc(e.message)+'</div>';
+    }
+  }
+
+  status.textContent = 'Reel ready — ' + slides.length + ' slides generated. Download individually or all at once.';
+  btn.disabled = false;
+}
+
+function sDownloadSlide(idx, name){
+  var src = window._sReelSlides && window._sReelSlides[idx];
+  if(src) sDownloadImg(src, name || ('reel-slide-'+(idx+1)+'.png'));
+}
+
+function sDownloadAllSlides(){
+  if(!window._sReelSlides || !window._sReelSlides.length){ alert('No slides generated yet.'); return; }
+  window._sReelSlides.forEach(function(src,i){
+    if(src) setTimeout(function(){ sDownloadImg(src,'reel-slide-'+(i+1)+'.png'); }, i*800);
+  });
+}
+
+</script>
+</body>
+</html>
